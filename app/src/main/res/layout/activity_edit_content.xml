@@ -87,5 +87,38 @@
         android:minWidth="50dp"
         android:transitionName="@string/logo_transition_name"/>
     <!-- TODO: #18 edit conditions here -->
+    <TextView
+        android:id="@+id/edit_activity_condition_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bind to condition" />
+    <RadioGroup
+        android:id="@+id/edit_activity_condition_Group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
+        <RadioButton
+            android:id="@+id/edit_activity_condition_WIFI"
+            android:layout_width="103dp"
+            android:layout_height="wrap_content"
+            android:text="WIFI" />
+
+        <RadioButton
+            android:id="@+id/edit_activity_condition_Bluetooth"
+            android:layout_width="148dp"
+            android:layout_height="wrap_content"
+            android:text="Bluetooth" />
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/edit_activity_condition_GPS"
+            android:text="GPS" />
+    </RadioGroup>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Begin to bind"
+        android:id="@+id/edit_activity_confirm_condition"
+        />
 </LinearLayout>

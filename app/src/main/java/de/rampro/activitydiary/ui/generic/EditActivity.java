@@ -24,6 +24,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +32,9 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import com.google.android.material.textfield.TextInputLayout;
 import androidx.appcompat.widget.TooltipCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -38,9 +42,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
@@ -49,11 +56,13 @@ import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 import java.util.LinkedList;
 
 import de.rampro.activitydiary.ActivityDiaryApplication;
+import android.Manifest;
 import de.rampro.activitydiary.R;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 import de.rampro.activitydiary.helpers.ActivityHelper;
 import de.rampro.activitydiary.helpers.JaroWinkler;
 import de.rampro.activitydiary.helpers.GraphicsHelper;
+import de.rampro.activitydiary.helpers.BindCondition;
 import de.rampro.activitydiary.model.DiaryActivity;
 
 /*
@@ -63,6 +72,15 @@ import de.rampro.activitydiary.model.DiaryActivity;
 public class EditActivity extends BaseActivity implements ActivityHelper.DataChangedListener {
     @Nullable
     private DiaryActivity currentActivity; /* null is for creating a new object */
+
+    //Mycode
+    private static final int REQUEST_CODE = 100001;
+    private int Condition_Type =0;
+    private final int Condition_WIFI = 1;
+    private final int Condition_Bluetooth = 2;
+    private final int Condition_GPS = 3;
+    //Mycode end
+
 
     private final int QUERY_NAMES = 1;
     private final int RENAME_DELETED_ACTIVITY = 2;
@@ -291,7 +309,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         mCp.setColor(mActivityColor);
     }
 
-    private QHandler mQHandler = new QHandler();
+    private QHandler mQHandler = new QHandler();//查询操作的总控制器
 
 
     @Override
@@ -308,7 +326,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         Intent i = getIntent();
         int actId = i.getIntExtra("activityID", -1);
         if(actId == -1) {
-            currentActivity = null;
+            currentActivity = null;//标志新activity
         }else {
             currentActivity = ActivityHelper.helper.activityWithId(actId);
         }
@@ -353,6 +371,59 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
             }
         });
 
+        //Mycode
+        RadioGroup setCondition = (RadioGroup) findViewById(R.id.edit_activity_condition_Group);
+        setCondition.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch(checkedId){
+                    case R.id.edit_activity_condition_WIFI:
+                        Condition_Type = Condition_WIFI;
+                        break;
+                    case R.id.edit_activity_condition_Bluetooth:
+                        Condition_Type = Condition_Bluetooth;
+                        break;
+                    case R.id.edit_activity_condition_GPS:
+                        Condition_Type = Condition_GPS;
+                        break;
+                }
+            }
+        });
+
+        Button conditionConfirm = (Button) findViewById(R.id.edit_activity_confirm_condition);
+        conditionConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int activity=0;
+
+                boolean isAllGranted = checkPermissionAllGranted(
+                        new String[] {
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.ACCESS_WIFI_STATE,
+                                Manifest.permission.ACCESS_NETWORK_STATE
+                        }
+                );
+                // 如果这3个权限全都拥有, 则直接执行备份代码
+                if (isAllGranted) {
+                    BindCondition.Bind(Condition_Type,activity,EditActivity.this);
+                }
+                ActivityCompat.requestPermissions(EditActivity.this,new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_WIFI_STATE,
+                        Manifest.permission.ACCESS_NETWORK_STATE
+                },REQUEST_CODE);
+
+
+            }
+        });
+
+
+
+        //Mycode end
+
+
         if(savedInstanceState != null) {
             String name = savedInstanceState.getString(NAME_KEY);
             mActivityColor = savedInstanceState.getInt(COLOR_KEY);
@@ -366,6 +437,42 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_cancel);
         checkConstraints();
     }
+
+    //mycode
+    /*@Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_CODE) {
+            boolean isAllGranted = true;
+
+            // 判断是否所有的权限都已经授予了
+            for (int grant : grantResults) {
+                if (grant != PackageManager.PERMISSION_GRANTED) {
+                    isAllGranted = false;
+                    break;
+                }
+            }
+
+            if (isAllGranted) {
+                // 如果所有的权限都授予了, 则执行备份代码
+                int activity = 0;
+                BindCondition.Bind(Condition_Type,activity,EditActivity.this);
+git
+            }
+        }
+    }*/
+
+    private boolean checkPermissionAllGranted(String[] permissions) {
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                // 只要有一个权限没有被授予, 则直接返回 false
+                return false;
+            }
+        }
+        return true;
+    }
+    //mycode end
 
     @Override
     public void onResume(){
@@ -417,7 +524,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                         ).show();
                     } else {
                         if (currentActivity == null) {
-                            ActivityHelper.helper.insertActivity(new DiaryActivity(-1, mActivityName.getText().toString(), mActivityColor));
+                            ActivityHelper.helper.insertActivity(new DiaryActivity(-1, mActivityName.getText().toString(), mActivityColor));//创建activity
                         } else {
                             currentActivity.setName(mActivityName.getText().toString());
                             currentActivity.setColor(mActivityColor);

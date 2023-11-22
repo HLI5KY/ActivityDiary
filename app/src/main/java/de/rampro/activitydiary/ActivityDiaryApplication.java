@@ -46,7 +46,7 @@ public class ActivityDiaryApplication extends Application {
         }
     }
 
-    @Override
+   /* @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
@@ -81,7 +81,7 @@ public class ActivityDiaryApplication extends Application {
                                 .build()
                 )
         );
-    }
+    }*/  //报错信息功能
 
     public static Context getAppContext() {
         return ActivityDiaryApplication.context;
