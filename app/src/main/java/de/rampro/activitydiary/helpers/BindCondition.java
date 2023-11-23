@@ -18,7 +18,11 @@
  */
 package de.rampro.activitydiary.helpers;
 import android.content.Context;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.helpers.ConditionInfo;
@@ -45,13 +49,18 @@ public class BindCondition{
     private static int BindWIFI(int activity,Context context){
             String ssid = ConditionInfo.WIFI.getSSID(context);
             String bssid = ConditionInfo.WIFI.getBSSID(context);
-            System.out.println("SSID:"+ "  "+ssid+"\n");
-            System.out.println("BSSID:"+ "  "+bssid+"\n");
+            Log.d("SSID",ssid);
+            Log.d("BSSID",bssid);
             Toast.makeText(context, "test 1", Toast.LENGTH_LONG).show();
             return 1;
 
     }
     private static int BindBluetooth(int activity,Context context){
+        ArrayList<String> infos = ConditionInfo.Bluetooth.getInfos(context);
+        for(int i=0;i<infos.size();i=i+2){
+            Log.d("Name",infos.get(i));
+            Log.d("Mac",infos.get(i+1));
+        }
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
         return 1;
     }

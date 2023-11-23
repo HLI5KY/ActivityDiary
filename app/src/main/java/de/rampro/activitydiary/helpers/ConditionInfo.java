@@ -19,13 +19,26 @@
 
 package de.rampro.activitydiary.helpers;
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BitmapKt;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 import de.rampro.activitydiary.helpers.BindCondition.Reference;
 
@@ -47,12 +60,12 @@ public class ConditionInfo{
         public void onReceive(Context context, Intent intent){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             if(wm.isWifiEnabled()){
-                Toast.makeText(context,"wifi已开启",Toast.LENGTH_LONG).show();
+                Log.d("WIFI_info","WIFI已开启");
                 WifiInfo info = wm.getConnectionInfo();
                 String ssid = info.getSSID();
                 String bssid = info.getBSSID();
                 if(bssid != null){//wifi连接切换
-                    Toast.makeText(context,"wifi已修改",Toast.LENGTH_LONG).show();
+                    Log.d("WIFI_info","wifi已修改");
                     /*
                     检查当前activity是否与该wifi匹配
                     检查是否有activity与该wifi绑定
@@ -61,7 +74,7 @@ public class ConditionInfo{
                 }
                 return;
             }
-            Toast.makeText(context,"连接已关闭",Toast.LENGTH_LONG).show();
+            Log.d("WIFI_info","连接已关闭");
             //wifi关闭
             /*检查当前activity是否与wifi绑定
             有->检查activity是被动启动还是主动启动
@@ -84,8 +97,8 @@ public class ConditionInfo{
         }
         public static String getSSID(Context context){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            if(wm != null){
-                WifiInfo info = wm.getConnectionInfo();
+            WifiInfo info = wm.getConnectionInfo();
+            if(info != null){
                 String ssid = info.getSSID();
                 if(ssid.length() > 2 && ssid.charAt(0) == '"' && ssid.charAt(ssid.length()-1) == '"'){
                     return ssid.substring(1,ssid.length()-1);
@@ -95,8 +108,8 @@ public class ConditionInfo{
         }
         public static String getBSSID(Context context){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            if(wm != null){
-                WifiInfo info = wm.getConnectionInfo();
+            WifiInfo info = wm.getConnectionInfo();
+            if(info != null){
                 String bssid = info.getBSSID();
                 return bssid;
             }
@@ -110,8 +123,35 @@ public class ConditionInfo{
         }
 
         public static boolean isBluetoothEnabled(Context context){
-            return false;
+            BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            BluetoothAdapter ba = (BluetoothAdapter) bm.getAdapter();
+            return (ba != null && ba.isEnabled());
         }
+        public static ArrayList<String> getInfos(Context context){
+            ArrayList<String> infos = new ArrayList<String>();
+            BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            Set<BluetoothDevice> deviceList = bm.getAdapter().getBondedDevices();
+            for(BluetoothDevice device : deviceList){
+                boolean isConnect = false;
+                try {
+                    //获取当前连接的蓝牙信息
+                    isConnect = (boolean) device.getClass().getMethod("isConnected").invoke(device);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (isConnect) {
+                    String name = device.getName();
+                    String Mac = device.getAddress();
+                    if(name.length()>0) infos.add(name);
+                    else infos.add("");
+                    if(Mac.length()>0) infos.add(Mac);
+                    else infos.add("");
+                }
+
+                }
+            return infos;
+        }
+
     }
     public static class GPS extends BroadcastReceiver{
         @Override

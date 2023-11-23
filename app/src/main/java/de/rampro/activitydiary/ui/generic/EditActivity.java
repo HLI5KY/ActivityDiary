@@ -39,6 +39,7 @@ import androidx.core.content.ContextCompat;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -396,29 +397,29 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
             @Override
             public void onClick(View v) {
                 int activity=0;
-
-                boolean isAllGranted = checkPermissionAllGranted(
+               boolean isAllGranted = checkPermissionAllGranted(
                         new String[] {
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                                 Manifest.permission.ACCESS_COARSE_LOCATION,
                                 Manifest.permission.ACCESS_WIFI_STATE,
-                                Manifest.permission.ACCESS_NETWORK_STATE
+                                Manifest.permission.ACCESS_NETWORK_STATE,
+                                Manifest.permission.BLUETOOTH,
+                                Manifest.permission.BLUETOOTH_ADMIN
                         }
-                );
-                // 如果这3个权限全都拥有, 则直接执行
-                if (isAllGranted) {
+                        ,EditActivity.this);
+                if (isAllGranted) {// 如果这3个权限全都拥有, 则直接执行
                     if(ConditionInfo.conditionCheck(EditActivity.this,Condition_Type))
                         BindCondition.Bind(Condition_Type,activity,EditActivity.this);
-                    else Toast.makeText(EditActivity.this,"绑定失败，请开启WIFI/GPS/蓝牙",Toast.LENGTH_LONG).show();
+                    else Log.d("Connection","绑定失败，请连接WIFI/蓝牙/GPS");
                 }
-                ActivityCompat.requestPermissions(EditActivity.this,new String[]{
+                else ActivityCompat.requestPermissions(EditActivity.this,new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_WIFI_STATE,
-                        Manifest.permission.ACCESS_NETWORK_STATE
+                        Manifest.permission.ACCESS_NETWORK_STATE,
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_ADMIN
                 },BindCondition.Reference.REQUEST_CODE);
-
-
             }
         });
         //检测wifi连接状态的修改
@@ -467,9 +468,9 @@ git
         }
     }*/
 
-    private boolean checkPermissionAllGranted(String[] permissions) {
+    private boolean checkPermissionAllGranted(String[] permissions,Context context) {
         for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                 // 只要有一个权限没有被授予, 则直接返回 false
                 return false;
             }

@@ -41,6 +41,10 @@
         android:required="false"/>
     <uses-permission android:name="android.permission.INTERNET"
         android:required="false"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:required="false"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:required="false"/>
 
     <application
         android:allowBackup="true"
