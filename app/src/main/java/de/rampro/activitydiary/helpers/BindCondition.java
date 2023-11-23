@@ -23,28 +23,33 @@ import android.widget.Toast;
 import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.helpers.ConditionInfo;
 
-public class BindCondition extends EditActivity{
-    private static final int WIFI =  1;
-    private static final int Bluetooth =  2;
-    private static final int GPS =  3;
+public class BindCondition{
+    public class Reference{
+        public static final int REQUEST_CODE = 100001;
+
+        public static final int Condition_WIFI = 1;
+        public static final int Condition_Bluetooth = 2;
+        public static final int Condition_GPS = 3;
+    }
     public static int Bind(int type,int activity,Context context){
         switch(type){
-            case WIFI:
+            case Reference.Condition_WIFI:
                 return BindWIFI(activity,context);
-            case Bluetooth:
+            case Reference.Condition_Bluetooth:
                 return BindBluetooth(activity,context);
-            case GPS:
+            case Reference.Condition_GPS:
                 return BindGPS(activity,context);
         }
         return 0;
     }
     private static int BindWIFI(int activity,Context context){
-        String ssid = ConditionInfo.WIFI.getSSID(context);
-        String bssid = ConditionInfo.WIFI.getBSSID(context);
-        System.out.println("SSID:"+ "  "+ssid+"\n");
-        System.out.println("BSSID:"+ "  "+bssid+"\n");
-        Toast.makeText(context, "test 1", Toast.LENGTH_LONG).show();
-        return 1;
+            String ssid = ConditionInfo.WIFI.getSSID(context);
+            String bssid = ConditionInfo.WIFI.getBSSID(context);
+            System.out.println("SSID:"+ "  "+ssid+"\n");
+            System.out.println("BSSID:"+ "  "+bssid+"\n");
+            Toast.makeText(context, "test 1", Toast.LENGTH_LONG).show();
+            return 1;
+
     }
     private static int BindBluetooth(int activity,Context context){
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
