@@ -409,7 +409,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                 if (isAllGranted) {
                     if(ConditionInfo.conditionCheck(EditActivity.this,Condition_Type))
                         BindCondition.Bind(Condition_Type,activity,EditActivity.this);
-                    Toast.makeText(EditActivity.this,"绑定失败，请开启WIFI/GPS/蓝牙",Toast.LENGTH_LONG).show();
+                    else Toast.makeText(EditActivity.this,"绑定失败，请开启WIFI/GPS/蓝牙",Toast.LENGTH_LONG).show();
                 }
                 ActivityCompat.requestPermissions(EditActivity.this,new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
