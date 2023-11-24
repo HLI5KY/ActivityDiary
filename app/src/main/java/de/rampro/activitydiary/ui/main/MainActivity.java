@@ -276,7 +276,7 @@ public class MainActivity extends BaseActivity implements
             filterActivityView(query);
         }
         //mycode
-        ConditionInfo.WIFI.changeReceiver(this,null);
+        //ConditionInfo.WIFI.changeReceiver(this,null);
         //mycode
 // TODO: this is crazy to call onActivityChagned here, as it reloads the statistics and refills the viewModel... Completely against the idea of the viewmodel :-(
         onActivityChanged(); /* do this at the very end to ensure that no Loader finishes its data loading before */
