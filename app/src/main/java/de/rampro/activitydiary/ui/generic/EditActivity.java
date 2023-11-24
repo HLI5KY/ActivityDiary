@@ -422,8 +422,9 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                 },BindCondition.Reference.REQUEST_CODE);
             }
         });
-        //检测wifi连接状态的修改
+        //检测状态的修改
         ConditionInfo.WIFI.changeReceiver(EditActivity.this,null);
+        ConditionInfo.Bluetooth.changeReceiver(EditActivity.this,null);
         //
 
         //Mycode end

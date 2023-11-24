@@ -74,13 +74,13 @@ public class ConditionInfo{
                 }
                 return;
             }
-            Log.d("WIFI_info","连接已关闭");
-            //wifi关闭
-            /*检查当前activity是否与wifi绑定
-            有->检查activity是被动启动还是主动启动
-                被动->关闭activity
-                主动->return
-            无->return*/
+            else Log.d("WIFI_info","连接已关闭");
+                //wifi关闭
+                /*检查当前activity是否与wifi绑定
+                有->检查activity是被动启动还是主动启动
+                    被动->关闭activity
+                    主动->return
+                无->return*/
 
         }
         public static void changeReceiver(Context context,Intent intent){
@@ -119,9 +119,33 @@ public class ConditionInfo{
     public static class Bluetooth extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
-
+            BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            BluetoothAdapter ba= bm.getAdapter();
+            if(ba.isEnabled()){
+                ArrayList<String> infos = getInfos(context);
+                if(infos.size()>0){
+                    Log.d("Bluetooth_info","蓝牙已修改");
+                    /*check第一个设备是否有绑定的activity
+                            有->启动
+                            无->return*/
+                }
+                else Log.d("Bluetooth","蓝牙已开启");
+            }
+            else Log.d("Bluetooth_info","蓝牙已关闭");
+                /*检查当前activity是否与蓝牙绑定
+                有->检查activity是被动启动还是主动启动
+                    被动->关闭activity
+                    主动->return
+                无->return*/
         }
-
+        public static void changeReceiver(Context context,Intent intent){
+            ConditionInfo.Bluetooth bluetoothReceiver = new ConditionInfo.Bluetooth();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            context.registerReceiver(bluetoothReceiver,filter);
+            bluetoothReceiver.onReceive(context,intent);
+        }
         public static boolean isBluetoothEnabled(Context context){
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
             BluetoothAdapter ba = (BluetoothAdapter) bm.getAdapter();
@@ -160,6 +184,9 @@ public class ConditionInfo{
         }
         public static boolean isGPSenabled(Context context){
             return false;
+        }
+        public static void changeReceiver(Context context,Intent intent){
+
         }
     }
 
