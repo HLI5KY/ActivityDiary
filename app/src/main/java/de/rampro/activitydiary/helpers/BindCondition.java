@@ -28,12 +28,15 @@ import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.helpers.ConditionInfo;
 
 public class BindCondition{
-    public class Reference{
+    public static class Reference{
         public static final int REQUEST_CODE = 100001;
 
         public static final int Condition_WIFI = 1;
         public static final int Condition_Bluetooth = 2;
         public static final int Condition_GPS = 3;
+
+        public static String CurrentWIFI = "";
+        public static String CurrentBluetooth = "";
     }
     public static int Bind(int type,int activity,Context context){
         switch(type){

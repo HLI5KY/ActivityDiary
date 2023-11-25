@@ -58,38 +58,38 @@ public class ConditionInfo{
     public static class WIFI extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
-            WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            if(wm.isWifiEnabled()){
-                Log.d("WIFI_info","WIFI已开启");
-                WifiInfo info = wm.getConnectionInfo();
-                String ssid = info.getSSID();
-                String bssid = info.getBSSID();
-                if(bssid != null){//wifi连接切换
-                    Log.d("WIFI_info","wifi已修改");
-                    /*
-                    检查当前activity是否与该wifi匹配
-                    检查是否有activity与该wifi绑定
-                    有->启动
-                    无->return*/
+            String action = intent.getAction();
+            if(action != null){
+                switch (action){
+                    case WifiManager.WIFI_STATE_CHANGED_ACTION:
+                        int Wstate = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,0);
+                        switch (Wstate){
+                            case WifiManager.WIFI_STATE_ENABLED:
+                                Log.d("WIFI_info","WIFI已开启");
+                                break;
+                            case WifiManager.WIFI_STATE_DISABLED:
+                                Reference.CurrentWIFI = "";
+                                Log.d("WIFI_info","WIFI已关闭");
+                                break;
+                        }
+                        break;
+                    case WifiManager.NETWORK_STATE_CHANGED_ACTION:
+                        String bssid = ConditionInfo.WIFI.getBSSID(context);
+                        if(!Reference.CurrentWIFI.equals(bssid) && !bssid.equals("") && !bssid.equals("00:00:00:00:00:00")){
+                            Reference.CurrentWIFI = bssid;
+                            Log.d("WIFI_info","WIFI已修改"+Reference.CurrentWIFI);
+                        }
+                        break;
                 }
-                return;
             }
-            Log.d("WIFI_info","连接已关闭");
-            //wifi关闭
-            /*检查当前activity是否与wifi绑定
-            有->检查activity是被动启动还是主动启动
-                被动->关闭activity
-                主动->return
-            无->return*/
-
         }
         public static void changeReceiver(Context context,Intent intent){
             ConditionInfo.WIFI WIFIreceiver = new ConditionInfo.WIFI();
             IntentFilter filter = new IntentFilter();
             filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-            filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+            filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
+            filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
             context.registerReceiver(WIFIreceiver,filter);
-            WIFIreceiver.onReceive(context,intent);
         }
         public static boolean isWIFIenabled(Context context){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -111,7 +111,7 @@ public class ConditionInfo{
             WifiInfo info = wm.getConnectionInfo();
             if(info != null){
                 String bssid = info.getBSSID();
-                return bssid;
+                if(bssid != null) return bssid;
             }
             return "";
         }
@@ -119,9 +119,49 @@ public class ConditionInfo{
     public static class Bluetooth extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
-
+            String action = intent.getAction();
+            if(action != null){
+                switch (action) {
+                    case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
+                        int Astate = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,0);
+                        switch (Astate){
+                            case BluetoothAdapter.STATE_CONNECTED:
+                                Log.d("Bluetooth_info","蓝牙已连接");
+                            /*check 蓝牙是否有绑定activity
+                                    有->启动
+                                    无->return*/
+                                break;
+                            case BluetoothAdapter.STATE_DISCONNECTED:
+                                Log.d("Bluetooth_info","蓝牙已断开");
+                            /*check activity是否绑定蓝牙
+                                    有->关闭
+                                    无->return*/
+                                break;
+                        }
+                        break;
+                    case BluetoothAdapter.ACTION_STATE_CHANGED:
+                        int Cstate = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,0);
+                        switch (Cstate){
+                            case BluetoothAdapter.STATE_ON:
+                                Log.d("Bluetooth","蓝牙已开启");
+                                break;
+                            case BluetoothAdapter.STATE_OFF:
+                                Log.d("Bluetooth_info","蓝牙已关闭");
+                                break;
+                    }
+                    break;
+                }
+            }
         }
-
+        public static void changeReceiver(Context context,Intent intent){
+            ConditionInfo.Bluetooth bluetoothReceiver = new ConditionInfo.Bluetooth();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+            context.registerReceiver(bluetoothReceiver,filter);
+            BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            if(bm.getAdapter().isEnabled()) Log.d("Bluetooth","蓝牙已开启test");
+        }
         public static boolean isBluetoothEnabled(Context context){
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
             BluetoothAdapter ba = (BluetoothAdapter) bm.getAdapter();
@@ -160,6 +200,9 @@ public class ConditionInfo{
         }
         public static boolean isGPSenabled(Context context){
             return false;
+        }
+        public static void changeReceiver(Context context,Intent intent){
+
         }
     }
 
