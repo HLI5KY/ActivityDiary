@@ -195,7 +195,8 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 "_deleted INTEGER DEFAULT 0, " +
                 "name TEXT NOT NULL UNIQUE," +
                 "color INTEGER," +
-                "parent INTEGER " +
+                "parent INTEGER, " +
+                "connection INTEGER " +
                 ");");
 
         db.execSQL("CREATE TABLE " +

@@ -108,6 +108,8 @@ public class ActivityDiaryContract {
         String X_START_OF_LAST = "start_of_last";
 
         /* TODO #25: add image, required and activation conditions */
+        //        连接类型：WIFI、蓝牙、GPS
+        String CONNECTION = "connection";
     }
 
     /* The columns in a DiaryActivity */

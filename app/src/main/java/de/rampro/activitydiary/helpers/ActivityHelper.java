@@ -99,7 +99,8 @@ public class ActivityHelper extends AsyncQueryHandler{
     private static final String[] ACTIVITIES_PROJ = new String[] {
             ActivityDiaryContract.DiaryActivity._ID,
             ActivityDiaryContract.DiaryActivity.NAME,
-            ActivityDiaryContract.DiaryActivity.COLOR
+            ActivityDiaryContract.DiaryActivity.COLOR,
+            ActivityDiaryContract.DiaryActivity.CONNECTION
     };
     private static final String SELECTION = ActivityDiaryContract.DiaryActivity._DELETED + "=0";
 
@@ -342,7 +343,8 @@ public class ActivityHelper extends AsyncQueryHandler{
                     while (!cursor.isAfterLast()) {
                         DiaryActivity act = new DiaryActivity(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity._ID)),
                                 cursor.getString(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.NAME)),
-                                cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.COLOR)));
+                                cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.COLOR)),
+                                cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.CONNECTION)));
                         /* TODO: optimize by keeping a map with id as key and the DiaryActivities */
                         activities.add(act);
                         unsortedActivities.add(act);
@@ -375,6 +377,7 @@ public class ActivityHelper extends AsyncQueryHandler{
             }else if(token == UNDELETE_ACTIVITY){
 
                 DiaryActivity act = (DiaryActivity)cookie;
+                act.setConnection(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.CONNECTION)));
                 act.setColor(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.COLOR)));
                 act.setName(cursor.getString(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.NAME)));
                 act.setId(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity._ID)));
@@ -606,7 +609,7 @@ public class ActivityHelper extends AsyncQueryHandler{
 
     /* undelete an activity with given ID */
     public DiaryActivity undeleteActivity(int id, String name){
-        DiaryActivity result = new DiaryActivity(id, name, 0);
+        DiaryActivity result = new DiaryActivity(id, name, 0, 0);
         ContentValues values = new ContentValues();
         values.put(ActivityDiaryContract.Diary._DELETED, 0);
 

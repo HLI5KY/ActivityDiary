@@ -90,7 +90,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
     private final int SIMILAR_ACTIVITY = 4;
 
     private final String[] NAME_TEST_PROJ = new String[]{ActivityDiaryContract.DiaryActivity.NAME};
-
+    private final String CONNECTION_KEY = "CONNECTION";
     private final String COLOR_KEY = "COLOR";
     private final String NAME_KEY = "NAME";
 
@@ -99,6 +99,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
     private ImageView mActivityColorImg;
     private int mActivityColor;
     private ColorPicker mCp;
+    private int mActivityConnection;
     private int linkCol; /* accent color -> to be sued for links */
     private ImageButton mQuickFixBtn1;
     private ImageButton mBtnRenameDeleted;
@@ -303,6 +304,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
             mActivityName.setText(currentActivity.getName());
             getSupportActionBar().setTitle(currentActivity.getName());
             mActivityColor = currentActivity.getColor();
+            mActivityConnection = currentActivity.getConnection();
         } else {
             currentActivity = null;
             mActivityColor = GraphicsHelper.prepareColorForNextActivity();
@@ -374,7 +376,24 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         });
 
         //Mycode
+
+//        加载activity连接类型
         RadioGroup setCondition = (RadioGroup) findViewById(R.id.edit_activity_condition_Group);
+        if(currentActivity != null){
+            switch(currentActivity.getConnection()){
+                case 1:
+                    setCondition.check(R.id.edit_activity_condition_WIFI);
+                    break;
+                case 2:
+                    setCondition.check(R.id.edit_activity_condition_Bluetooth);
+                    break;
+                case 3:
+                    setCondition.check(R.id.edit_activity_condition_GPS);
+                    break;
+            }
+
+        }
+
         setCondition.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -389,6 +408,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                         Condition_Type = BindCondition.Reference.Condition_GPS;
                         break;
                 }
+                mActivityConnection = Condition_Type;
             }
         });
 
@@ -424,7 +444,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         });
         //检测状态的修改
         ConditionInfo.WIFI.changeReceiver(EditActivity.this,null);
-        ConditionInfo.Bluetooth.changeReceiver(EditActivity.this,null);
+//        ConditionInfo.Bluetooth.changeReceiver(EditActivity.this,null);
         //
 
         //Mycode end
@@ -500,6 +520,7 @@ git
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(NAME_KEY, mActivityName.getText().toString());
         outState.putInt(COLOR_KEY, mActivityColor);
+        outState.putInt(CONNECTION_KEY, mActivityConnection);
         // call superclass to save any view hierarchy
         super.onSaveInstanceState(outState);
     }
@@ -530,10 +551,11 @@ git
                         ).show();
                     } else {
                         if (currentActivity == null) {
-                            ActivityHelper.helper.insertActivity(new DiaryActivity(-1, mActivityName.getText().toString(), mActivityColor));//创建activity
+                            ActivityHelper.helper.insertActivity(new DiaryActivity(-1, mActivityName.getText().toString(), mActivityColor, mActivityConnection));//创建activity
                         } else {
                             currentActivity.setName(mActivityName.getText().toString());
                             currentActivity.setColor(mActivityColor);
+                            currentActivity.setConnection(mActivityConnection);
                             ActivityHelper.helper.updateActivity(currentActivity);
                         }
                         finish();
