@@ -341,9 +341,9 @@ public class ActivityHelper extends AsyncQueryHandler{
                     activities.clear();
                     unsortedActivities.clear();
                     while (!cursor.isAfterLast()) {
-                        DiaryActivity act = new DiaryActivity(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity._ID)),
-                                cursor.getString(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.NAME)),
-                                cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.COLOR)),
+                        DiaryActivity act = new DiaryActivity(cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.NAME)),
+                                cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.COLOR)),
                                 cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.CONNECTION)));
                         /* TODO: optimize by keeping a map with id as key and the DiaryActivities */
                         activities.add(act);
@@ -356,17 +356,17 @@ public class ActivityHelper extends AsyncQueryHandler{
                     listener.onActivityDataChanged();
                 }
             }else if(token == QUERY_CURRENT_ACTIVITY){
-                if(!cursor.isNull(cursor.getColumnIndex(ActivityDiaryContract.Diary.END))){
+                if(!cursor.isNull(cursor.getColumnIndexOrThrow(ActivityDiaryContract.Diary.END))){
                     /* no current activity */
                     mCurrentNote = "";
                     mCurrentDiaryUri = null;
-                    mCurrentActivityStartTime.setTime(cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.Diary.END)));
+                    mCurrentActivityStartTime.setTime(cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.Diary.END)));
                 }else {
-                    mCurrentActivity = activityWithId(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.Diary.ACT_ID)));
-                    mCurrentActivityStartTime.setTime(cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.Diary.START)));
-                    mCurrentNote = cursor.getString(cursor.getColumnIndex(ActivityDiaryContract.Diary.NOTE));
+                    mCurrentActivity = activityWithId(cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.Diary.ACT_ID)));
+                    mCurrentActivityStartTime.setTime(cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.Diary.START)));
+                    mCurrentNote = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDiaryContract.Diary.NOTE));
                     mCurrentDiaryUri = Uri.withAppendedPath(ActivityDiaryContract.Diary.CONTENT_URI,
-                                        Long.toString(cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.Diary._ID))));
+                                        Long.toString(cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.Diary._ID))));
 
                 }
                 showCurrentActivityNotification();
@@ -377,10 +377,10 @@ public class ActivityHelper extends AsyncQueryHandler{
             }else if(token == UNDELETE_ACTIVITY){
 
                 DiaryActivity act = (DiaryActivity)cookie;
-                act.setConnection(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.CONNECTION)));
-                act.setColor(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.COLOR)));
-                act.setName(cursor.getString(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.NAME)));
-                act.setId(cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity._ID)));
+                act.setConnection(cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.CONNECTION)));
+                act.setColor(cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.COLOR)));
+                act.setName(cursor.getString(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.NAME)));
+                act.setId(cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID)));
 
                 for(DataChangedListener listener : mDataChangeListeners) {
                     // notify about the (re-)added activity
