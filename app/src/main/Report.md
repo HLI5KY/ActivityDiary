@@ -22,7 +22,7 @@
 ##### Constants
 
 #### db
-##### ActivityDiaryContract
+##### db.ActivityDiaryContract
 将类变量映射到数据库对应表属性  
 DiaryActivity类: Activity相关  
 Diary类: Diary相关  
@@ -97,7 +97,7 @@ class DiarySearchSuggestion
     SUGGESTION 最近的搜索建议
     ACTION 最近的搜索行为
     _DELETED
-##### LocalDBHelper
+##### db.LocalDBHelper
 onCreate 创建表格并插入预设的Activity
 onUpgrade 可自定义Alter语句修改数据库
 
@@ -144,7 +144,7 @@ diary_search_suggestions
     _deleted INTEGER
     action TEXT
     suggestion TEXT
-##### ActivityDiaryContentProvider
+##### db.ActivityDiaryContentProvider
 暂时用不到(大概
 class ActivityDiaryContentProvider
 Cursor query
@@ -153,3 +153,8 @@ int delete
 int update
 
 String searchDate
+
+##### model.DiaryActivity
+##### model.DetailViewModel
+
+##### helpers.ActivityHelper
