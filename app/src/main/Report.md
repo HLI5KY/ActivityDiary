@@ -151,10 +151,34 @@ Cursor query
 Uri insert
 int delete
 int update
-
 String searchDate
-
 ##### model.DiaryActivity
-##### model.DetailViewModel
+从数据库获取Activity相关数据后存储在该类实例中
+
+属性
+mId
+mName
+mColor
+mConnection
+方法
+getConnection()
+setConnection(int c)
 
 ##### helpers.ActivityHelper
+提供了一些增删改查的辅助方法
+
+activities 包含全部Activity的列表  
+mDataChangeListeners 对Activity增删改等操作的侦听器
+
+reloadAll 重新加载所有Activity  
+readCurrentActivity 读取最近的Diary  
+onQueryComplete 查询相关
+
+增删改相关操作可通过DiaryActivity类实现:  
+updateActivity(DiaryActivity act) 更新  
+undeleteActivity(int id, String name) 恢复  
+insertActivity(DiaryActivity act) 插入  
+deleteActivity(DiaryActivity act) 删除  
+activityWithId(int id) 返回对应id的Activity  
+contentFor(DiaryActivity act) 返回Activity的内容(默认返回名称和颜色)
+
