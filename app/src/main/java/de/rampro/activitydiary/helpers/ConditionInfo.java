@@ -160,7 +160,7 @@ public class ConditionInfo{
             filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
             context.registerReceiver(bluetoothReceiver,filter);
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-            if(bm.getAdapter().isEnabled()) Log.d("Bluetooth","蓝牙已开启test");
+            if(bm.getAdapter()!= null && bm.getAdapter().isEnabled()) Log.d("Bluetooth","蓝牙已开启test");
         }
         public static boolean isBluetoothEnabled(Context context){
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
