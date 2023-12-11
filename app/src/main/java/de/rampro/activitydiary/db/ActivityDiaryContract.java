@@ -108,6 +108,8 @@ public class ActivityDiaryContract {
         String X_START_OF_LAST = "start_of_last";
 
         /* TODO #25: add image, required and activation conditions */
+        //        连接类型：WIFI、蓝牙、GPS
+        String CONNECTION = "connection";
     }
 
     /* The columns in a DiaryActivity */
@@ -469,6 +471,37 @@ public class ActivityDiaryContract {
 
         private DiarySearchSuggestion() {
         }
+
+    }
+
+    public final static class DiaryCondition {
+
+        private DiaryCondition() {
+        }
+
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "diaryCondition");
+
+        public static final String TABLE_NAME = "diary_condition";
+
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE +
+                        "/vnd.de.rampro.activitydiary_diary_conditions";
+
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE +
+                        "/vnd.de.rampro.activitydiary_diary_condition";
+
+//        主键
+        public static final String _ID = "_id";
+
+        public static final String _DELETED = "_deleted";
+        public static final String TYPE = "type";
+        public static final String ACT_ID = "act_id";
+        public static final String URI = "uri";
+        public static final String[] PROJECTION_ALL =
+                {_ID, _DELETED, ACT_ID, URI};
+
+        public static final String SORT_ORDER_DEFAULT = "";
 
     }
 }

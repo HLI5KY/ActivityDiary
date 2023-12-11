@@ -79,6 +79,8 @@ import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.BuildConfig;
 import de.rampro.activitydiary.R;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
+import de.rampro.activitydiary.db.LocalDBHelper;
+import de.rampro.activitydiary.db.ActivityDiaryContentProvider;
 import de.rampro.activitydiary.helpers.ActivityHelper;
 import de.rampro.activitydiary.helpers.ConditionInfo;
 import de.rampro.activitydiary.helpers.DateHelper;
@@ -278,6 +280,8 @@ public class MainActivity extends BaseActivity implements
         //mycode
         //ConditionInfo.WIFI.changeReceiver(this,null);
         //mycode
+
+
 // TODO: this is crazy to call onActivityChagned here, as it reloads the statistics and refills the viewModel... Completely against the idea of the viewmodel :-(
         onActivityChanged(); /* do this at the very end to ensure that no Loader finishes its data loading before */
     }
@@ -722,7 +726,7 @@ public class MainActivity extends BaseActivity implements
             super.onQueryComplete(token, cookie, cursor);
             if ((cursor != null) && cursor.moveToFirst()) {
                 if (token == QUERY_CURRENT_ACTIVITY_STATS) {
-                    long avg = cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.X_AVG_DURATION));
+                    long avg = cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.X_AVG_DURATION));
                     viewModel.mAvgDuration.setValue(getResources().
                             getString(R.string.avg_duration_description, TimeSpanFormatter.format(avg)));
 
@@ -730,14 +734,14 @@ public class MainActivity extends BaseActivity implements
                     String formatString = sharedPref.getString(SettingsActivity.KEY_PREF_DATETIME_FORMAT,
                             getResources().getString(R.string.default_datetime_format));
 
-                    long start = cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.X_START_OF_LAST));
+                    long start = cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.X_START_OF_LAST));
 
                     viewModel.mStartOfLast.setValue(getResources().
                             getString(R.string.last_done_description, DateFormat.format(formatString, start)));
 
                 }else if(token == QUERY_CURRENT_ACTIVITY_TOTAL) {
                     StatParam p = (StatParam)cookie;
-                    long total = cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.DiaryStats.DURATION));
+                    long total = cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryStats.DURATION));
 
                     String x = DateHelper.dateFormat(p.field).format(p.end);
                     x = x + ": " + TimeSpanFormatter.format(total);

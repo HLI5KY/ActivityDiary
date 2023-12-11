@@ -23,11 +23,12 @@ public class DiaryActivity{
     private String mName;
     private int mId;
     private int mColor;
-
-    public DiaryActivity(int id, String name, int color){
+    private int mConnection;
+    public DiaryActivity(int id, String name, int color, int connection){
         mId = id;
         mName = name;
         mColor = color;
+        mConnection = connection;
     }
 
     public String getName(){
@@ -42,6 +43,10 @@ public class DiaryActivity{
 
     public int getId() { return mId;}
     public void setId(int id) { mId = id;}
+    public int getConnection(){
+        return mConnection;
+    }
+    public void setConnection(int connection){ mConnection = connection;}
 
     public boolean equals(Object other){
         return other != null && other instanceof DiaryActivity && ((DiaryActivity)other).getName().equals(mName);
