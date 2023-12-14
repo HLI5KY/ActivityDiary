@@ -674,10 +674,31 @@ public class ActivityHelper extends AsyncQueryHandler{
         return null;
     }
 
+    public DiaryActivity activityWithName(String name){
+        synchronized (this) {
+            if(unsortedActivities.isEmpty()){
+                /* activities not yet loaded, so it doesn't make sense yet to read the activities */
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    /* intended empty */
+                }
+            }
+            for (DiaryActivity a : activities) {
+                if (a.getName() == name) {
+                    return a;
+                }
+            }
+        }
+        return null;
+    }
+
+
     private ContentValues contentFor(DiaryActivity act){
         ContentValues result = new ContentValues();
         result.put(ActivityDiaryContract.DiaryActivity.NAME, act.getName());
         result.put(ActivityDiaryContract.DiaryActivity.COLOR, act.getColor());
+        result.put(ActivityDiaryContract.DiaryActivity.CONNECTION, act.getConnection());
         return result;
     }
 

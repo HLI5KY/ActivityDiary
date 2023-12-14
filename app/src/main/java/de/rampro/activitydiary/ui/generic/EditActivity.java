@@ -154,9 +154,9 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                 else if(token == QUERY_NAMES){
                     if(cursor.moveToFirst()) {
                         mQuickFixBtn1.setVisibility(View.VISIBLE);
-                        boolean deleted = (cursor.getLong(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity._DELETED)) != 0);
-                        int actId = cursor.getInt(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity._ID));
-                        String name = cursor.getString(cursor.getColumnIndex(ActivityDiaryContract.DiaryActivity.NAME));
+                        boolean deleted = (cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._DELETED)) != 0);
+                        int actId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID));
+                        String name = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.NAME));
                         setCheckState(CHECK_STATE_ERROR);
 
                         if(deleted) {
@@ -381,13 +381,13 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         RadioGroup setCondition = (RadioGroup) findViewById(R.id.edit_activity_condition_Group);
         if(currentActivity != null){
             switch(currentActivity.getConnection()){
-                case 1:
+                case BindCondition.Reference.Condition_WIFI:
                     setCondition.check(R.id.edit_activity_condition_WIFI);
                     break;
-                case 2:
+                case BindCondition.Reference.Condition_Bluetooth:
                     setCondition.check(R.id.edit_activity_condition_Bluetooth);
                     break;
-                case 3:
+                case BindCondition.Reference.Condition_GPS:
                     setCondition.check(R.id.edit_activity_condition_GPS);
                     break;
             }
