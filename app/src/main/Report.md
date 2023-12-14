@@ -146,12 +146,6 @@ diary_search_suggestions
     suggestion TEXT
 ##### db.ActivityDiaryContentProvider
 暂时用不到(大概
-class ActivityDiaryContentProvider
-Cursor query
-Uri insert
-int delete
-int update
-String searchDate
 ##### model.DiaryActivity
 从数据库获取Activity相关数据后存储在该类实例中
 
@@ -163,22 +157,43 @@ mConnection
 方法
 getConnection()
 setConnection(int c)
-
 ##### helpers.ActivityHelper
-提供了一些增删改查的辅助方法
-
 activities 包含全部Activity的列表  
 mDataChangeListeners 对Activity增删改等操作的侦听器
-
-reloadAll 重新加载所有Activity  
-readCurrentActivity 读取最近的Diary  
-onQueryComplete 查询相关
-
-增删改相关操作可通过DiaryActivity类实现:  
+提供了一些增删改查的辅助方法, 可通过DiaryActivity类直接实现, 不需要连接SQLiteDatabase通过sql语句实现:  
 updateActivity(DiaryActivity act) 更新  
 undeleteActivity(int id, String name) 恢复  
 insertActivity(DiaryActivity act) 插入  
 deleteActivity(DiaryActivity act) 删除  
 activityWithId(int id) 返回对应id的Activity  
 contentFor(DiaryActivity act) 返回Activity的内容(默认返回名称和颜色)
+
+
+具体流程:  
+创建新Activity
+```
+ActivityHelper.helper.insertActivity(new DiaryActivity(-1, name, color, connection));
+```
+获取Activity
+// AsyncQueryHandler类的startQuery()函数执行查询操作后, 会自动调用onQueryComplete()函数, 后者的cursor包含了返回的查询结果  
+// 以EditActivity为例, startQuery()根据Activity名字查询返回的结果唯一  
+// 修改onQueryComplete(), 先通过cursor获取对应id, 再调用ActivityHelper.helper.activityWithId()  
+// currentActivity是一个DiaryActivity类的实例, 存储Activity相关数据  
+```
+int actId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID));  
+currentActivity = ActivityHelper.helper.activityWithId(actId)
+```
+更新Activity
+```
+currentActivity.setName(name);  
+currentActivity.setColor(color);  
+currentActivity.setConnection(connection);
+...  
+ActivityHelper.helper.updateActivity(currentActivity);
+```
+删除Activity
+```
+ActivityHelper.helper.deleteActivity(currentActivity);
+```
+
 
