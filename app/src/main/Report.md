@@ -149,17 +149,19 @@ diary_search_suggestions
 ##### model.DiaryActivity
 从数据库获取Activity相关数据后存储在该类实例中
 
-属性
-mId
-mName
-mColor
-mConnection
-方法
-getConnection()
-setConnection(int c)
+属性:  
+mId  
+mName  
+mColor  
+mConnection  
+方法:  
+getConnection  
+setConnection  
+...
 ##### helpers.ActivityHelper
 activities 包含全部Activity的列表  
-mDataChangeListeners 对Activity增删改等操作的侦听器
+mDataChangeListeners 对Activity增删改等操作的侦听器  
+
 提供了一些增删改查的辅助方法, 可通过DiaryActivity类直接实现, 不需要连接SQLiteDatabase通过sql语句实现:  
 updateActivity(DiaryActivity act) 更新  
 undeleteActivity(int id, String name) 恢复  
@@ -174,7 +176,7 @@ contentFor(DiaryActivity act) 返回Activity的内容(默认返回名称和颜�
 ```
 ActivityHelper.helper.insertActivity(new DiaryActivity(-1, name, color, connection));
 ```
-获取Activity
+获取Activity  
 // AsyncQueryHandler类的startQuery()函数执行查询操作后, 会自动调用onQueryComplete()函数, 后者的cursor包含了返回的查询结果  
 // 以EditActivity为例, startQuery()根据Activity名字查询返回的结果唯一  
 // 修改onQueryComplete(), 先通过cursor获取对应id, 再调用ActivityHelper.helper.activityWithId()  
