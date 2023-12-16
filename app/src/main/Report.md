@@ -172,18 +172,65 @@ contentFor(DiaryActivity act) 返回Activity的内容(默认返回名称和颜�
 
 
 具体流程:  
+获取Activity (以EditActivity为例)  
+QHandler继承自AsyncQueryHandler  
+调用startQuery()执行查询后, 会自动调用onQueryComplete()  
+startQuery()的参数解释如下  
+```
+private QHandler mQHandler = new QHandler();//查询操作的总控制器
+
+mQHandler.startQuery(
+        //token: 查询类型的标识，此处为按名称查找Activity
+        QUERY_NAMES,
+
+        //cookie: 传给onQueryComplete()的对象，可为空
+        null,
+        
+        //uri: 类似FROM, 参照ActivityDiaryContract, 此处为DiaryActivity对应的表activity
+        ActivityDiaryContract.DiaryActivity.CONTENT_URI,
+        
+        //projection: 类似SELECT, 此处为查找表activity的属性name, _deleted, _id
+        new String[]{ActivityDiaryContract.DiaryActivity.NAME, ActivityDiaryContract.DiaryActivity._DELETED, ActivityDiaryContract.DiaryActivity._ID},
+        
+        //selection: 类似WHERE，此处为activity.name等于某值
+        ActivityDiaryContract.DiaryActivity.NAME + "=?",
+        
+        //selectionArgs: 补充selection的参数
+        new String[]{mActivityName.getText().toString()},
+        
+        //orderBy: 排序方式
+        null);
+```
+需要重写QHandler.onQueryComplete()来处理查询返回的数据  
+```
+//调用startQuery()后自动调用onQueryComplete()
+//token为查询类型的标识
+//cursor包含了startQuery()返回的查询结果
+
+private class QHandler extends AsyncQueryHandler {
+    protected void onQueryComplete(int token, Object cookie,
+                               Cursor cursor) { 
+    if ((cursor != null)) {
+        if(token == QUERY_NAMES){
+            if(cursor.moveToFirst()) { //按名称查询最多只有一个返回结果(UNIQUE约束)
+            
+                //获取activity的一些属性
+                //deleted可用来过滤掉已删除的activity
+                boolean deleted = (cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._DELETED)) != 0);
+                int actId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.NAME));
+                
+                //调用activityWithId(), 存储返回的DiaryActivity类实例
+                currentActivity = ActivityHelper.helper.activityWithId(actId);                   
+            }
+        }
+        cursor.close();
+    }
+}
+```
 创建新Activity
 ```
 ActivityHelper.helper.insertActivity(new DiaryActivity(-1, name, color, connection));
-```
-获取Activity  
-// AsyncQueryHandler类的startQuery()函数执行查询操作后, 会自动调用onQueryComplete()函数, 后者的cursor包含了返回的查询结果  
-// 以EditActivity为例, startQuery()根据Activity名字查询返回的结果唯一  
-// 修改onQueryComplete(), 先通过cursor获取对应id, 再调用ActivityHelper.helper.activityWithId()  
-// currentActivity是一个DiaryActivity类的实例, 存储Activity相关数据  
-```
-int actId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID));  
-currentActivity = ActivityHelper.helper.activityWithId(actId)
 ```
 更新Activity
 ```
