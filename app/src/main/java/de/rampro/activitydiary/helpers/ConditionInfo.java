@@ -29,8 +29,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,6 +43,7 @@ import androidx.core.graphics.BitmapKt;
 import java.util.ArrayList;
 import java.util.Set;
 
+import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.helpers.BindCondition.Reference;
 
 public class ConditionInfo{
@@ -51,10 +55,11 @@ public class ConditionInfo{
             case Reference.Condition_Bluetooth:
                 return Bluetooth.isBluetoothEnabled(context);
             case Reference.Condition_GPS:
-                return GPS.isGPSenabled(context);
+                return GPS.isGPSEnabled(context);
         }
         return false;
     }
+
     public static class WIFI extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
@@ -83,6 +88,7 @@ public class ConditionInfo{
                 }
             }
         }
+
         public static void changeReceiver(Context context,Intent intent){
             ConditionInfo.WIFI WIFIreceiver = new ConditionInfo.WIFI();
             IntentFilter filter = new IntentFilter();
@@ -91,10 +97,12 @@ public class ConditionInfo{
             filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
             context.registerReceiver(WIFIreceiver,filter);
         }
+
         public static boolean isWIFIenabled(Context context){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             return wm.isWifiEnabled();
         }
+
         public static String getSSID(Context context){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = wm.getConnectionInfo();
@@ -106,6 +114,7 @@ public class ConditionInfo{
             }
             return "";
         }
+
         public static String getBSSID(Context context){
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = wm.getConnectionInfo();
@@ -116,6 +125,7 @@ public class ConditionInfo{
             return "";
         }
     }
+
     public static class Bluetooth extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
@@ -153,6 +163,7 @@ public class ConditionInfo{
                 }
             }
         }
+
         public static void changeReceiver(Context context,Intent intent){
             ConditionInfo.Bluetooth bluetoothReceiver = new ConditionInfo.Bluetooth();
             IntentFilter filter = new IntentFilter();
@@ -162,11 +173,13 @@ public class ConditionInfo{
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
             if(bm.getAdapter().isEnabled()) Log.d("Bluetooth","蓝牙已开启test");
         }
+
         public static boolean isBluetoothEnabled(Context context){
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
             BluetoothAdapter ba = (BluetoothAdapter) bm.getAdapter();
             return (ba != null && ba.isEnabled());
         }
+
         public static ArrayList<String> getInfos(Context context){
             ArrayList<String> infos = new ArrayList<String>();
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -193,16 +206,75 @@ public class ConditionInfo{
         }
 
     }
+
     public static class GPS extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
+            // 该方法没有自动回调
+            Log.d("Location_Check", "onReceive可执行");
+            String action = intent.getAction();
+            switch (action) {
+                case LocationManager.MODE_CHANGED_ACTION:
+                    if (intent.getBooleanExtra(LocationManager.EXTRA_LOCATION_ENABLED, true)){
+                        Log.d("Location_Info", "定位可用");
+                    }
+                    else{
+                        Log.d("Location_Info", "定位不可用");
+                    }
+                    break;
 
+                case LocationManager.PROVIDERS_CHANGED_ACTION:
+                    // location providers 的状态一次只能检查一个，无法直接显示是否至少一个可用，
+                    // 暂时没有比较好的实现，这一段很可能是冗余的。
+                    String providerName = intent.getStringExtra(LocationManager.EXTRA_PROVIDER_NAME);
+                    if (intent.getBooleanExtra(LocationManager.EXTRA_PROVIDER_ENABLED, false)){
+                        Log.d("LocationProvider_Info", "Provider: " + providerName + " 可用");
+                    }
+                    else{
+                        Log.d("LocationProvider_Info", "Provider: " + providerName + " 不可用");
+                    }
+                    break;
+            }
         }
-        public static boolean isGPSenabled(Context context){
-            return false;
+
+        public static boolean isGPSEnabled(Context context){
+            LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                return lm.isLocationEnabled();  // need API 28
+            }
+            else {
+                Log.d("Method: isGPSEnabled()", "API VERSION EXCEPTION");
+                return false;
+            }
         }
+
         public static void changeReceiver(Context context,Intent intent){
+            ConditionInfo.GPS GPSReceiver = new ConditionInfo.GPS();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(LocationManager.MODE_CHANGED_ACTION);
+            filter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
+            context.registerReceiver(GPSReceiver, filter);
+        }
 
+        public static ArrayList<String> getInfos(Context context){
+            ArrayList<String> infos = new ArrayList<>();
+            // 直接调用了LocationHelper中的方法，得到的数据本身合法，应该无需检查
+            Location location = LocationHelper.helper.getCurrentLocation();
+            String latitude = String.valueOf(location.getLatitude());
+            String longitude = String.valueOf(location.getLongitude());
+            // Log.d("DEBUG_Latitude", latitude);
+            // 已经可以收到正确的定位信息
+            infos.add(latitude);
+            infos.add(longitude);
+
+            /* 海拔
+            if (location.hasAltitude()) {
+                String altitude = String.valueOf(LocationHelper.helper.getCurrentLocation().getAltitude());
+                infos.add(altitude);
+            }
+            */
+
+            return infos;
         }
     }
 

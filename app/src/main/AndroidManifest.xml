@@ -28,9 +28,11 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:required="false" />
 
+    <!-- for foreground service -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
         android:required="false" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:required="false" />
 
     <uses-feature android:name="android.hardware.location.gps"
         android:required="false"/>
@@ -45,6 +47,10 @@
         android:required="false"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:required="false"/>
+
+    <!-- for background location service -->
+    <!-- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        android:required="false" /> -->
 
     <application
         android:allowBackup="true"

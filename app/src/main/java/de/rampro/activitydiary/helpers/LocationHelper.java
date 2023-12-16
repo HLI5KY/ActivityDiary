@@ -31,6 +31,8 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
@@ -181,7 +183,8 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
      */
     @Override
     public void onProviderDisabled(String provider) {
-
+        Toast.makeText(ActivityDiaryApplication.getAppContext(), "onProviderDisabled is called, " +
+                provider + " is no longer usable.", Toast.LENGTH_LONG).show();
     }
 
     @Override
