@@ -417,7 +417,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
             @Override
             public void onClick(View v) {
                 int activity=0;
-               boolean isAllGranted = checkPermissionAllGranted(
+                boolean isAllGranted = checkPermissionAllGranted(
                         new String[] {
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                                 Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -446,6 +446,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         ConditionInfo.WIFI.changeReceiver(EditActivity.this,null);
 //        ConditionInfo.Bluetooth.changeReceiver(EditActivity.this,null);
         //
+        ConditionInfo.GPS.changeReceiver(EditActivity.this, null);
 
         //Mycode end
 
