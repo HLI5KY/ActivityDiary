@@ -239,6 +239,13 @@ private class QHandler extends AsyncQueryHandler {
     }
 }
 ```
+对于cursor返回多个结果的情况，可改为以下形式:  
+```
+if(cursor.moveToFirst()){
+    do{...}while (cursor.moveToNext())
+}
+
+```
 创建新Activity
 ```
 ActivityHelper.helper.insertActivity(new DiaryActivity(-1, name, color, connection));
