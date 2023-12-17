@@ -174,18 +174,30 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 ");");
     }
 
-    private void createDiaryConditionTable(SQLiteDatabase db) {
+    private void createActivityConnectionTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " +
-                "diary_condition " +
+                "activity_connection " +
                 "(" +
                 "_id INTEGER PRIMARY KEY ASC, " +
                 "_deleted INTEGER DEFAULT 0, " +
-                "type TEXT NOT NULL, " +
+                "connection_type INTEGER DEFAULT 0, " +
                 "act_id INTEGER NOT NULL, " +
-                "uri TEXT NOT NULL, " +
                 " FOREIGN KEY(act_id) REFERENCES activity(_id)" +
                 ");");
     }
+
+//    private void createDiaryConditionTable(SQLiteDatabase db) {
+//        db.execSQL("CREATE TABLE " +
+//                "diary_condition " +
+//                "(" +
+//                "_id INTEGER PRIMARY KEY ASC, " +
+//                "_deleted INTEGER DEFAULT 0, " +
+//                "type TEXT NOT NULL, " +
+//                "act_id INTEGER NOT NULL, " +
+//                "uri TEXT NOT NULL, " +
+//                " FOREIGN KEY(act_id) REFERENCES activity(_id)" +
+//                ");");
+//    }
 
     private void createTablesForVersion(SQLiteDatabase db, int version) {
         db.execSQL("CREATE TABLE " +

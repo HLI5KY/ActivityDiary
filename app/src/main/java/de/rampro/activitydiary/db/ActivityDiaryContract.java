@@ -474,34 +474,27 @@ public class ActivityDiaryContract {
 
     }
 
-    public final static class DiaryCondition {
+    public final static class ActivityConnection {
 
-        private DiaryCondition() {
+        private ActivityConnection() {
         }
 
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "diaryCondition");
-
-        public static final String TABLE_NAME = "diary_condition";
-
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "activityConnection");
+        public static final String TABLE_NAME = "activity_connection";
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE +
-                        "/vnd.de.rampro.activitydiary_diary_conditions";
-
+                        "/vnd.de.rampro.activitydiary_activity_connections";
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE +
-                        "/vnd.de.rampro.activitydiary_diary_condition";
-
-//        主键
+                        "/vnd.de.rampro.activitydiary_activity_connection";
+        //主键
         public static final String _ID = "_id";
-
         public static final String _DELETED = "_deleted";
-        public static final String TYPE = "type";
+        public static final String CONNECTION_TYPE = "connection_type";
         public static final String ACT_ID = "act_id";
-        public static final String URI = "uri";
-        public static final String[] PROJECTION_ALL =
-                {_ID, _DELETED, ACT_ID, URI};
-
-        public static final String SORT_ORDER_DEFAULT = "";
+//        public static final String URI = "uri";
+//        public static final String[] PROJECTION_ALL = {};
+//        public static final String SORT_ORDER_DEFAULT = "";
 
     }
 }

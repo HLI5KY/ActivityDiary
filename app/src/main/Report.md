@@ -97,6 +97,13 @@ class DiarySearchSuggestion
     SUGGESTION 最近的搜索建议
     ACTION 最近的搜索行为
     _DELETED
+
+class ActivityConnection
+
+    ID 某一连接的id
+    _DELETED
+    CONNECTION_TYPE 连接类型
+    ACT_ID 所属Activity的id
 ##### db.LocalDBHelper
 onCreate 创建表格并插入预设的Activity
 onUpgrade 可自定义Alter语句修改数据库
@@ -144,6 +151,13 @@ diary_search_suggestions
     _deleted INTEGER
     action TEXT
     suggestion TEXT
+
+activity_connection
+
+    _id INTEGER
+    _deleted INTEGER
+    connection_type INTEGER
+    act_id INTEGER
 ##### db.ActivityDiaryContentProvider
 暂时用不到(大概
 ##### model.DiaryActivity
@@ -159,9 +173,6 @@ getConnection
 setConnection  
 ...
 ##### helpers.ActivityHelper
-activities 包含全部Activity的列表  
-mDataChangeListeners 对Activity增删改等操作的侦听器  
-
 提供了一些增删改查的辅助方法, 可通过DiaryActivity类直接实现, 不需要连接SQLiteDatabase通过sql语句实现:  
 updateActivity(DiaryActivity act) 更新  
 undeleteActivity(int id, String name) 恢复  
