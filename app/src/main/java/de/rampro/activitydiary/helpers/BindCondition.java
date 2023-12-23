@@ -38,6 +38,7 @@ public class BindCondition{
         public static String CurrentWIFI = "";
         public static String CurrentBluetooth = "";
     }
+
     public static int Bind(int type,int activity,Context context){
         switch(type){
             case Reference.Condition_WIFI:
@@ -49,6 +50,7 @@ public class BindCondition{
         }
         return 0;
     }
+
     private static int BindWIFI(int activity,Context context){
             String ssid = ConditionInfo.WIFI.getSSID(context);
             String bssid = ConditionInfo.WIFI.getBSSID(context);
@@ -58,6 +60,7 @@ public class BindCondition{
             return 1;
 
     }
+
     private static int BindBluetooth(int activity,Context context){
         ArrayList<String> infos = ConditionInfo.Bluetooth.getInfos(context);
         for(int i=0;i<infos.size();i=i+2){
@@ -67,7 +70,12 @@ public class BindCondition{
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
         return 1;
     }
+
     private static int BindGPS(int activity,Context context){
+        ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
+        Log.d("Latitude", infos.get(0));  // 纬度
+        Log.d("Longitude", infos.get(1));  // 经度
+        // Log.d("Altitude", infos.get(2));
         Toast.makeText(context, "test 3", Toast.LENGTH_LONG).show();
         return 1;
     }
