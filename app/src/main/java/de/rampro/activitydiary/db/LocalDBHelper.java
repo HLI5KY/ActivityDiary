@@ -24,12 +24,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
+import android.util.Log;
 
 
 public class LocalDBHelper extends SQLiteOpenHelper {
 
     public LocalDBHelper(Context context) {
         super(context, ActivityDiaryContract.AUTHORITY, null, CURRENT_VERSION);
+        onUpgrade(this.getWritableDatabase(),1,7);
     }
 
     @Override
@@ -82,9 +84,15 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 "(" + ActivityDiaryContract.DiaryActivity.NAME + "," + ActivityDiaryContract.DiaryActivity.COLOR + ")" +
                 " VALUES " +
                 " ('Sleeping', '" + Color.parseColor("#303f9f") + "');");
+        //测试数据库更改
+        db.execSQL("INSERT INTO " +
+                ActivityDiaryContract.DiaryActivity.TABLE_NAME +
+                "(" + ActivityDiaryContract.DiaryActivity.NAME + "," + ActivityDiaryContract.DiaryActivity.COLOR + ")" +
+                " VALUES " +
+                " ('UpgradeTest', '" + Color.parseColor("#114514") + "');");
     }
 
-    public static final int CURRENT_VERSION = 5;
+    public static final int CURRENT_VERSION = 7;
 /*
     For debugging sometimes it is handy to drop a table again. This can easily be achieved in onDowngrade,
     after CURRENT_VERSION is decremented again
@@ -103,15 +111,21 @@ public class LocalDBHelper extends SQLiteOpenHelper {
          * you can use ALTER TABLE to rename the old table, then create the new table and then
          * populate the new table with the contents of the old table.
          */
+        Log.d("Upgrade", oldVersion + " " +newVersion);
         if (oldVersion == 1) {
             /* upgrade from 1 to current */
             /* still alpha, so just delete and restart */
             /* do not use synmbolic names here, because in case of later rename the old names shall be dropped */
-            db.execSQL("DROP TABLE activity");
-            db.execSQL("DROP TABLE activity_alias");
-            db.execSQL("DROP TABLE condition");
-            db.execSQL("DROP TABLE conditions_map");
-            db.execSQL("DROP TABLE diary");
+            db.execSQL("DROP TABLE IF EXISTS activity");
+            db.execSQL("DROP TABLE IF EXISTS diary");
+            db.execSQL("DROP TABLE IF EXISTS location");
+            db.execSQL("DROP TABLE IF EXISTS diary_image");
+            db.execSQL("DROP TABLE IF EXISTS diary_search_suggestions");
+            db.execSQL("DROP TABLE IF EXISTS activity_connection");
+
+//            db.execSQL("DROP TABLE activity_alias");
+//            db.execSQL("DROP TABLE condition");
+//            db.execSQL("DROP TABLE conditions_map");
             onCreate(db);
             oldVersion = CURRENT_VERSION;
         }
@@ -127,11 +141,12 @@ public class LocalDBHelper extends SQLiteOpenHelper {
         if (oldVersion < 5) {
             /* upgrade from 4 to 5 */
             createRecentSuggestionsTable(db);
+            createActivityConnectionTable(db);
         }
 
-        if (newVersion > 5) {
-            throw new RuntimeException("Database upgrade to version " + newVersion + " nyi.");
-        }
+//        if (newVersion > 5) {
+//            throw new RuntimeException("Database upgrade to version " + newVersion + " nyi.");
+//        }
     }
 
     private void createDiaryLocationTable(SQLiteDatabase db) {
@@ -233,6 +248,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
 
         if (version >= 5) {
             createRecentSuggestionsTable(db);
+            createActivityConnectionTable(db);
         }
 
     }
