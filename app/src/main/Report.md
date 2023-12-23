@@ -97,6 +97,13 @@ class DiarySearchSuggestion
     SUGGESTION 最近的搜索建议
     ACTION 最近的搜索行为
     _DELETED
+
+class ActivityConnection
+
+    ID 某一连接的id
+    _DELETED
+    CONNECTION_TYPE 连接类型
+    ACT_ID 所属Activity的id
 ##### db.LocalDBHelper
 onCreate 创建表格并插入预设的Activity
 onUpgrade 可自定义Alter语句修改数据库
@@ -144,17 +151,116 @@ diary_search_suggestions
     _deleted INTEGER
     action TEXT
     suggestion TEXT
+
+activity_connection
+
+    _id INTEGER
+    _deleted INTEGER
+    connection_type INTEGER
+    act_id INTEGER
 ##### db.ActivityDiaryContentProvider
 暂时用不到(大概
-class ActivityDiaryContentProvider
-Cursor query
-Uri insert
-int delete
-int update
-
-String searchDate
-
 ##### model.DiaryActivity
-##### model.DetailViewModel
+从数据库获取Activity相关数据后存储在该类实例中
 
+属性:  
+mId  
+mName  
+mColor  
+mConnection  
+方法:  
+getConnection  
+setConnection  
+...
 ##### helpers.ActivityHelper
+提供了一些增删改查的辅助方法, 可通过DiaryActivity类直接实现, 不需要连接SQLiteDatabase通过sql语句实现:  
+updateActivity(DiaryActivity act) 更新  
+undeleteActivity(int id, String name) 恢复  
+insertActivity(DiaryActivity act) 插入  
+deleteActivity(DiaryActivity act) 删除  
+activityWithId(int id) 返回对应id的Activity  
+contentFor(DiaryActivity act) 返回Activity的内容(默认返回名称和颜色)
+
+
+具体流程:  
+获取Activity (以EditActivity为例)  
+QHandler继承自AsyncQueryHandler  
+调用startQuery()执行查询后, 会自动调用onQueryComplete()  
+startQuery()的参数解释如下  
+```
+private QHandler mQHandler = new QHandler();//查询操作的总控制器
+
+mQHandler.startQuery(
+        //token: 查询类型的标识，此处为按名称查找Activity
+        QUERY_NAMES,
+
+        //cookie: 传给onQueryComplete()的对象，可为空
+        null,
+        
+        //uri: 类似FROM, 参照ActivityDiaryContract, 此处为DiaryActivity对应的表activity
+        ActivityDiaryContract.DiaryActivity.CONTENT_URI,
+        
+        //projection: 类似SELECT, 此处为查找表activity的属性name, _deleted, _id
+        new String[]{ActivityDiaryContract.DiaryActivity.NAME, ActivityDiaryContract.DiaryActivity._DELETED, ActivityDiaryContract.DiaryActivity._ID},
+        
+        //selection: 类似WHERE，此处为activity.name等于某值
+        ActivityDiaryContract.DiaryActivity.NAME + "=?",
+        
+        //selectionArgs: 补充selection的参数
+        new String[]{mActivityName.getText().toString()},
+        
+        //orderBy: 排序方式
+        null);
+```
+需要重写QHandler.onQueryComplete()来处理查询返回的数据  
+```
+//调用startQuery()后自动调用onQueryComplete()
+//token为查询类型的标识
+//cursor包含了startQuery()返回的查询结果
+
+private class QHandler extends AsyncQueryHandler {
+    protected void onQueryComplete(int token, Object cookie,
+                               Cursor cursor) { 
+    if ((cursor != null)) {
+        if(token == QUERY_NAMES){
+            if(cursor.moveToFirst()) { //按名称查询最多只有一个返回结果(UNIQUE约束)
+            
+                //获取activity的一些属性
+                //deleted可用来过滤掉已删除的activity
+                boolean deleted = (cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._DELETED)) != 0);
+                int actId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity._ID));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryActivity.NAME));
+                
+                //调用activityWithId(), 存储返回的DiaryActivity类实例
+                currentActivity = ActivityHelper.helper.activityWithId(actId);                   
+            }
+        }
+        cursor.close();
+    }
+}
+```
+对于cursor返回多个结果的情况，可改为以下形式:  
+```
+if(cursor.moveToFirst()){
+    do{...}while (cursor.moveToNext())
+}
+
+```
+创建新Activity
+```
+ActivityHelper.helper.insertActivity(new DiaryActivity(-1, name, color, connection));
+```
+更新Activity
+```
+currentActivity.setName(name);  
+currentActivity.setColor(color);  
+currentActivity.setConnection(connection);
+...  
+ActivityHelper.helper.updateActivity(currentActivity);
+```
+删除Activity
+```
+ActivityHelper.helper.deleteActivity(currentActivity);
+```
+
+
