@@ -84,12 +84,12 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 "(" + ActivityDiaryContract.DiaryActivity.NAME + "," + ActivityDiaryContract.DiaryActivity.COLOR + ")" +
                 " VALUES " +
                 " ('Sleeping', '" + Color.parseColor("#303f9f") + "');");
-
+        //测试数据库更改
         db.execSQL("INSERT INTO " +
                 ActivityDiaryContract.DiaryActivity.TABLE_NAME +
                 "(" + ActivityDiaryContract.DiaryActivity.NAME + "," + ActivityDiaryContract.DiaryActivity.COLOR + ")" +
                 " VALUES " +
-                " ('UpgradeTest', '" + Color.parseColor("#191981") + "');");
+                " ('UpgradeTest', '" + Color.parseColor("#114514") + "');");
     }
 
     public static final int CURRENT_VERSION = 7;
