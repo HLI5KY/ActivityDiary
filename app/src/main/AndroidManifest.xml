@@ -26,7 +26,9 @@
 
     <!-- for photo storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:required="false" />
+        android:required="true" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:required="true" />
 
     <!-- for foreground service -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
@@ -61,7 +63,8 @@
         android:theme="@style/AppTheme"
         android:name=".ActivityDiaryApplication"
         android:largeHeap="true"
-        android:installLocation="auto">
+        android:installLocation="auto"
+        android:requestLegacyExternalStorage="true">
         <activity android:name=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:launchMode="singleTop"
