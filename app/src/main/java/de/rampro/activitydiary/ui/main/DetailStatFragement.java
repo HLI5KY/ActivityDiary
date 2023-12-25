@@ -26,6 +26,8 @@ import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +67,8 @@ public class DetailStatFragement extends Fragment {
 
         view.findViewById(R.id.detail_content).setOnClickListener(headerClickHandler);
 
-        viewModel = ViewModelProviders.of(getActivity()/*, viewModelFactory TODO */).get(DetailViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
+        Log.d("viewModel", "onCreateView: "+viewModel.mStartOfLast.getValue()+" "+viewModel.mTotalWeek.getValue());
 
         binding.setViewModel(viewModel);
         // Specify the current activity as the lifecycle owner.
@@ -94,6 +97,8 @@ public class DetailStatFragement extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+//        viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
+        Log.d("viewModel", "onResume: "+viewModel.mStartOfLast.getValue()+" "+viewModel.mTotalWeek.getValue());
         updateDurationTextView();
         updateDurationHandler.postDelayed(updateDurationRunnable, 10 * 1000);
     }

@@ -109,6 +109,10 @@
             android:label="@string/activity_title_map" />
         <activity android:name=".ui.statistics.StatisticsActivity"
             android:label="@string/activity_title_stats" />
+        <activity android:name=".ui.main.RecordActivity"
+            android:label="@string/activity_title_record"
+            android:windowSoftInputMode="stateVisible"
+            />
         <provider
             android:name=".db.ActivityDiaryContentProvider"
             android:authorities="${applicationId}.provider"

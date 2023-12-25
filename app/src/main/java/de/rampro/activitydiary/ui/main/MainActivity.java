@@ -20,7 +20,7 @@ package de.rampro.activitydiary.ui.main;
 
 import android.Manifest;
 import android.app.SearchManager;
-import androidx.lifecycle.MutableLiveData;
+
 import androidx.lifecycle.ViewModelProviders;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
@@ -33,6 +33,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -69,6 +70,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -79,10 +81,7 @@ import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.BuildConfig;
 import de.rampro.activitydiary.R;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
-import de.rampro.activitydiary.db.LocalDBHelper;
-import de.rampro.activitydiary.db.ActivityDiaryContentProvider;
 import de.rampro.activitydiary.helpers.ActivityHelper;
-import de.rampro.activitydiary.helpers.ConditionInfo;
 import de.rampro.activitydiary.helpers.DateHelper;
 import de.rampro.activitydiary.helpers.GraphicsHelper;
 import de.rampro.activitydiary.helpers.TimeSpanFormatter;
@@ -90,7 +89,6 @@ import de.rampro.activitydiary.model.DetailViewModel;
 import de.rampro.activitydiary.model.DiaryActivity;
 import de.rampro.activitydiary.ui.generic.BaseActivity;
 import de.rampro.activitydiary.ui.generic.EditActivity;
-import de.rampro.activitydiary.ui.history.HistoryDetailActivity;
 import de.rampro.activitydiary.ui.settings.SettingsActivity;
 
 /*
@@ -111,7 +109,7 @@ public class MainActivity extends BaseActivity implements
     private static final int QUERY_CURRENT_ACTIVITY_STATS = 1;
     private static final int QUERY_CURRENT_ACTIVITY_TOTAL = 2;
 
-    private DetailViewModel viewModel;
+    private static DetailViewModel viewModel;
 
     private String mCurrentPhotoPath;
 
@@ -193,9 +191,9 @@ public class MainActivity extends BaseActivity implements
                     .getBoolean(SettingsActivity.KEY_PREF_DISABLE_CURRENT, true)){
                 ActivityHelper.helper.setCurrentActivity(null);
             }else{
-                Intent i = new Intent(MainActivity.this, HistoryDetailActivity.class);
-                // no diaryEntryID will edit the last one
-                startActivity(i);
+//                Intent i = new Intent(MainActivity.this, HistoryDetailActivity.class);
+//                // no diaryEntryID will edit the last one
+//                startActivity(i);
             }
         });
 
@@ -348,14 +346,33 @@ public class MainActivity extends BaseActivity implements
         super.onPause();
     }
 
+    /*
+    * 原功能: 点击顶部卡片后,若当前有正在记录的Activity，则跳转至编辑页
+    * 修改功能: 跳转至该Activity的记录页
+    */
     @Override
     public boolean onLongClick(View view) {
-        Intent i = new Intent(MainActivity.this, EditActivity.class);
+        //MyCode
+        Intent i = new Intent(MainActivity.this, RecordActivity.class);
         if(viewModel.currentActivity().getValue() != null) {
+//            i.putExtra("activityViewModel", (Parcelable) viewModel);
             i.putExtra("activityID", viewModel.currentActivity().getValue().getId());
+            i.putExtra("activityName", viewModel.currentActivity().getValue().getName());
+            i.putExtra("activityColor", viewModel.currentActivity().getValue().getColor());
+
+            startActivity(i);
+            return true;
+        }else{
+            Toast.makeText(this,"no running activity", Toast.LENGTH_SHORT).show();
+            return false;
         }
-        startActivity(i);
-        return true;
+        //End
+//        Intent i = new Intent(MainActivity.this, EditActivity.class);
+//        if(viewModel.currentActivity().getValue() != null) {
+//            i.putExtra("activityID", viewModel.currentActivity().getValue().getId());
+//        }
+//        startActivity(i);
+//        return true;
     }
 
     @Override
@@ -739,7 +756,8 @@ public class MainActivity extends BaseActivity implements
                     viewModel.mStartOfLast.setValue(getResources().
                             getString(R.string.last_done_description, DateFormat.format(formatString, start)));
 
-                }else if(token == QUERY_CURRENT_ACTIVITY_TOTAL) {
+                }
+                else if(token == QUERY_CURRENT_ACTIVITY_TOTAL) {
                     StatParam p = (StatParam)cookie;
                     long total = cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryStats.DURATION));
 
@@ -769,4 +787,7 @@ public class MainActivity extends BaseActivity implements
             this.end = end;
         }
     }
+
+    public static DetailViewModel getViewModel(){return viewModel;}
+
 }
