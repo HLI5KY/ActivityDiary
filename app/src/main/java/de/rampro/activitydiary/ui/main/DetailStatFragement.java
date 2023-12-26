@@ -68,7 +68,17 @@ public class DetailStatFragement extends Fragment {
         view.findViewById(R.id.detail_content).setOnClickListener(headerClickHandler);
 
         viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
-        Log.d("viewModel", "onCreateView: "+viewModel.mStartOfLast.getValue()+" "+viewModel.mTotalWeek.getValue());
+
+        Activity a=getActivity();
+        if(a instanceof MainActivity){
+            viewModel = ((MainActivity) a).getViewModel();
+            Log.d("viewModel", "MainActivity onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
+        else if(a instanceof RecordActivity){
+            viewModel = ((RecordActivity) a).getViewModel();
+            Log.d("viewModel", "RecordActivity onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
+
 
         binding.setViewModel(viewModel);
         // Specify the current activity as the lifecycle owner.
@@ -92,13 +102,16 @@ public class DetailStatFragement extends Fragment {
         if(a instanceof MainActivity){
             ((MainActivity)a).queryAllTotals();
         }
+//        else if(a instanceof RecordActivity){
+//            Log.d("viewModel", "RecordActivity upDateTextView");
+//            ((RecordActivity)a).queryAllTotals();
+//        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
-        Log.d("viewModel", "onResume: "+viewModel.mStartOfLast.getValue()+" "+viewModel.mTotalWeek.getValue());
+        Log.d("viewModel", "onResume: "+viewModel.mStartOfLast.getValue());
         updateDurationTextView();
         updateDurationHandler.postDelayed(updateDurationRunnable, 10 * 1000);
     }
