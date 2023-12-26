@@ -72,11 +72,11 @@ public class DetailStatFragement extends Fragment {
         Activity a=getActivity();
         if(a instanceof MainActivity){
             viewModel = ((MainActivity) a).getViewModel();
-            Log.d("viewModel", "MainActivity onCreateView: "+viewModel.mStartOfLast.getValue());
+            Log.d("viewModel", "Main StatFrag onCreateView: "+viewModel.mStartOfLast.getValue());
         }
         else if(a instanceof RecordActivity){
             viewModel = ((RecordActivity) a).getViewModel();
-            Log.d("viewModel", "RecordActivity onCreateView: "+viewModel.mStartOfLast.getValue());
+            Log.d("viewModel", "Record StatFrag onCreateView: "+viewModel.mStartOfLast.getValue());
         }
 
 

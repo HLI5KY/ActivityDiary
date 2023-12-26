@@ -20,6 +20,8 @@
 package de.rampro.activitydiary.ui.main;
 
 import androidx.lifecycle.ViewModelProviders;
+
+import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,6 +31,8 @@ import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +59,16 @@ public class DetailPictureFragement extends Fragment implements LoaderManager.Lo
         View view = inflater.inflate(R.layout.fragment_detail_pictures, container, false);
 
         viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
+
+        Activity a=getActivity();
+        if(a instanceof MainActivity){
+            viewModel = ((MainActivity) a).getViewModel();
+            Log.d("viewModel", "Main PicFrag onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
+        else if(a instanceof RecordActivity){
+            viewModel = ((RecordActivity) a).getViewModel();
+            Log.d("viewModel", "Record PicFrag onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
 
         detailRecyclerView = view.findViewById(R.id.picture_recycler);
 
