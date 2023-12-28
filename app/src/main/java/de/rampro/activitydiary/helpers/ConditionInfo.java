@@ -210,12 +210,13 @@ public class ConditionInfo{
     public static class GPS extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
-            // 该方法没有自动回调
-            Log.d("Location_Check", "onReceive可执行");
+            // 该方法会在手机设置开关 Location 服务时自动回调；但只会get默认值
+            //
+            // Log.d("Location_Check", "onReceive可执行");
             String action = intent.getAction();
             switch (action) {
                 case LocationManager.MODE_CHANGED_ACTION:
-                    if (intent.getBooleanExtra(LocationManager.EXTRA_LOCATION_ENABLED, true)){
+                    if (intent.getBooleanExtra(LocationManager.EXTRA_LOCATION_ENABLED, false)){
                         Log.d("Location_Info", "定位可用");
                     }
                     else{
@@ -227,7 +228,7 @@ public class ConditionInfo{
                     // location providers 的状态一次只能检查一个，无法直接显示是否至少一个可用，
                     // 暂时没有比较好的实现，这一段很可能是冗余的。
                     String providerName = intent.getStringExtra(LocationManager.EXTRA_PROVIDER_NAME);
-                    if (intent.getBooleanExtra(LocationManager.EXTRA_PROVIDER_ENABLED, false)){
+                    if (intent.getBooleanExtra(LocationManager.EXTRA_PROVIDER_ENABLED, true)){
                         Log.d("LocationProvider_Info", "Provider: " + providerName + " 可用");
                     }
                     else{
