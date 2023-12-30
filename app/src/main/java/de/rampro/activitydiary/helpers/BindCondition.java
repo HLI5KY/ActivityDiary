@@ -17,16 +17,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package de.rampro.activitydiary.helpers;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
+import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
+
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import de.rampro.activitydiary.model.conditions.Condition;
 import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.helpers.ConditionInfo;
-
+/**
+ * 进行condition的绑定*/
 public class BindCondition{
     public static class Reference{
         public static final int REQUEST_CODE = 100001;
@@ -41,7 +49,7 @@ public class BindCondition{
 
     public static int Bind(int type,int activity,Context context){
         switch(type){
-            case Reference.Condition_WIFI:
+            case Condition_WIFI:
                 return BindWIFI(activity,context);
             case Reference.Condition_Bluetooth:
                 return BindBluetooth(activity,context);
@@ -52,16 +60,14 @@ public class BindCondition{
     }
 
     private static int BindWIFI(int activity,Context context){
-            String ssid = ConditionInfo.WIFI.getSSID(context);
-            String bssid = ConditionInfo.WIFI.getBSSID(context);
-            String info = ssid + "|" +bssid;
-
-            Log.d("SSID",ssid);
-            Log.d("BSSID",bssid);
-            Log.d("INFO",info);
-            Toast.makeText(context, "test 1", Toast.LENGTH_LONG).show();
-            return 1;
-
+        String ssid = ConditionInfo.WIFI.getSSID(context);
+        String bssid = ConditionInfo.WIFI.getBSSID(context);
+        String info = ssid + "|" +bssid;
+        ConditionQHelper helper = new ConditionQHelper(activity,context);
+        /*show a window to confirm*/
+        helper.cHelper("INSERT",info,Condition_WIFI);             //插入wifi数据
+        Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
+        return 1;
     }
 
     private static int BindBluetooth(int activity,Context context){

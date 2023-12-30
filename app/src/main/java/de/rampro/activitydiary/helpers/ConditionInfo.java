@@ -45,7 +45,8 @@ import java.util.Set;
 
 import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.helpers.BindCondition.Reference;
-
+/**
+ * 管理condition的改变*/
 public class ConditionInfo{
     /*创建activity时检查GPS/蓝牙/WIFI是否开启*/
     public static boolean conditionCheck(Context context,int type){

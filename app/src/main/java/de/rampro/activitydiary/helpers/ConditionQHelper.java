@@ -22,30 +22,43 @@ package de.rampro.activitydiary.helpers;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_Bluetooth;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
+import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
 
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
-
-import de.rampro.activitydiary.db.ActivityDiaryContract;
-import de.rampro.activitydiary.model.DiaryActivity;
-
-public class ConditionQHandler extends AsyncQueryHandler {
-    public ConditionQHandler(ContentResolver cr) {
-        super(cr);
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+/**
+ * 管理涉及condition的数据库操作*/
+public class ConditionQHelper {
+    int act_id = 0;
+    Context context;
+    public ConditionQHelper(int act_id,Context context){
+        this.act_id = act_id;
+        this.context = context;
     }
-    protected void onQueryComplete(int token, Object cookie,
-                                   Cursor cursor) {
-        if ((cursor != null)) {
-            switch (token) {
-                case Condition_WIFI:
-                    break;
-                case Condition_Bluetooth:
-                    break;
-                case Condition_GPS:
-                    break;
-            }
-            cursor.close();
+    public void cHelper(String operation,String info,int type){
+        switch (operation){
+            case "INSERT":
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                ContentValues insertValues = new ContentValues();
+                insertValues.put("info",info);
+                insertValues.put("act_id",this.act_id);
+                insertValues.put("connection_type",type);
+                insertValues.put("_deleted",0);
+                db.insert("activity_connection",null,insertValues);
+                break;
+            case "UPDATE":
+                break;
+            case "QUERY":
+                break;
+            case "DELETE":
+                break;
         }
+
     }
+
 }
