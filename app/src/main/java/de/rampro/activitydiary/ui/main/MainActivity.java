@@ -110,7 +110,7 @@ public class MainActivity extends BaseActivity implements
     private static final int QUERY_CURRENT_ACTIVITY_TOTAL = 2;
 
     private static DetailViewModel viewModel;
-
+    private static List<DetailViewModel> viewModels;
     private String mCurrentPhotoPath;
 
     private RecyclerView selectRecyclerView;
