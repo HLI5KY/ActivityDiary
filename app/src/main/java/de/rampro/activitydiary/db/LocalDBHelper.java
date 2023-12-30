@@ -142,6 +142,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
             /* upgrade from 4 to 5 */
             createRecentSuggestionsTable(db);
             createActivityConnectionTable(db);
+            createConnectionLocationTable(db);
         }
 
 //        if (newVersion > 5) {
@@ -197,23 +198,24 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 "_deleted INTEGER DEFAULT 0, " +
                 "connection_type INTEGER DEFAULT 0, " +
                 "info TEXT," +
+                "info Text, " +
                 "act_id INTEGER NOT NULL, " +
                 " FOREIGN KEY(act_id) REFERENCES activity(_id)" +
                 ");");
     }
 
-//    private void createDiaryConditionTable(SQLiteDatabase db) {
-//        db.execSQL("CREATE TABLE " +
-//                "diary_condition " +
-//                "(" +
-//                "_id INTEGER PRIMARY KEY ASC, " +
-//                "_deleted INTEGER DEFAULT 0, " +
-//                "type TEXT NOT NULL, " +
-//                "act_id INTEGER NOT NULL, " +
-//                "uri TEXT NOT NULL, " +
-//                " FOREIGN KEY(act_id) REFERENCES activity(_id)" +
-//                ");");
-//    }
+    private void createDiaryConditionTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " +
+                "diary_condition " +
+                "(" +
+                "_id INTEGER PRIMARY KEY ASC, " +
+                "_deleted INTEGER DEFAULT 0, " +
+                "type TEXT NOT NULL, " +
+                "act_id INTEGER NOT NULL, " +
+                "uri TEXT NOT NULL, " +
+                " FOREIGN KEY(act_id) REFERENCES activity(_id)" +
+                ");");
+    }
 
     private void createTablesForVersion(SQLiteDatabase db, int version) {
         db.execSQL("CREATE TABLE " +
@@ -238,6 +240,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 "note TEXT, " +
                 " FOREIGN KEY(act_id) REFERENCES activity(_id) " +
                 ");");
+//        createActivityConnectionTable(db);
 
         if (version >= 3) {
             createDiaryImageTable(db);
@@ -252,5 +255,19 @@ public class LocalDBHelper extends SQLiteOpenHelper {
             createActivityConnectionTable(db);
         }
 
+    }
+
+    private void createConnectionLocationTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " +
+                "bind_location" +
+                "(" +
+                "_id INTEGER PRIMARY KEY ASC, " +
+                "_deleted INTEGER DEFAULT 0, " +
+                "latitude REAL NOT NULL, " +
+                "longitude REAL NOT NULL, " +
+                // "altitude REAL DEFAULT NULL, " +
+                "act_id INTEGER NOT NULL, " +
+                " FOREIGN KEY(act_id) REFERENCES activity(_id) " +
+                ");");
     }
 }

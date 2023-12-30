@@ -430,7 +430,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                 if (isAllGranted) {// 如果这3个权限全都拥有, 则直接执行
                     if(ConditionInfo.conditionCheck(EditActivity.this,Condition_Type))
                         BindCondition.Bind(Condition_Type,activity,EditActivity.this);
-                    else Log.d("Connection","绑定失败，请连接WIFI/蓝牙/GPS");
+                    else  Toast.makeText(EditActivity.this,"绑定失败，请连接WIFI/蓝牙/GPS",Toast.LENGTH_LONG).show();
                 }
                 else ActivityCompat.requestPermissions(EditActivity.this,new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,

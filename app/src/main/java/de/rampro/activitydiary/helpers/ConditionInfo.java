@@ -45,7 +45,8 @@ import java.util.Set;
 
 import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.helpers.BindCondition.Reference;
-
+/**
+ * 管理condition的改变*/
 public class ConditionInfo{
     /*创建activity时检查GPS/蓝牙/WIFI是否开启*/
     public static boolean conditionCheck(Context context,int type){
@@ -171,7 +172,7 @@ public class ConditionInfo{
             filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
             context.registerReceiver(bluetoothReceiver,filter);
             BluetoothManager bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-            if(bm.getAdapter().isEnabled()) Log.d("Bluetooth","蓝牙已开启test");
+            if(bm.getAdapter()!= null && bm.getAdapter().isEnabled()) Log.d("Bluetooth","蓝牙已开启test");
         }
 
         public static boolean isBluetoothEnabled(Context context){
@@ -210,12 +211,13 @@ public class ConditionInfo{
     public static class GPS extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){
-            // 该方法没有自动回调
-            Log.d("Location_Check", "onReceive可执行");
+            // 该方法会在绑定一个gps后、手机设置开关 Location 服务时自动回调
+            // Log.d("Location_Check", "onReceive可执行");
             String action = intent.getAction();
             switch (action) {
                 case LocationManager.MODE_CHANGED_ACTION:
-                    if (intent.getBooleanExtra(LocationManager.EXTRA_LOCATION_ENABLED, true)){
+                    // if (intent.getBooleanExtra(LocationManager.EXTRA_LOCATION_ENABLED, false)){
+                    if (LocationHelper.helper.locationManager.isLocationEnabled()){
                         Log.d("Location_Info", "定位可用");
                     }
                     else{
@@ -227,7 +229,9 @@ public class ConditionInfo{
                     // location providers 的状态一次只能检查一个，无法直接显示是否至少一个可用，
                     // 暂时没有比较好的实现，这一段很可能是冗余的。
                     String providerName = intent.getStringExtra(LocationManager.EXTRA_PROVIDER_NAME);
-                    if (intent.getBooleanExtra(LocationManager.EXTRA_PROVIDER_ENABLED, false)){
+                    if (intent.getBooleanExtra(LocationManager.EXTRA_PROVIDER_ENABLED, true)){
+                    // if (LocationHelper.helper.locationManager.isProviderEnabled(providerName)){
+                    // 该方法会导致崩溃，原因未知
                         Log.d("LocationProvider_Info", "Provider: " + providerName + " 可用");
                     }
                     else{
