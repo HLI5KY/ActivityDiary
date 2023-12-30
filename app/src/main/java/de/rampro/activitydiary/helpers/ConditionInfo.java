@@ -60,7 +60,10 @@ public class ConditionInfo{
         }
         return false;
     }
-
+    public static String[] resolveInfo(String info){
+        String[] res = info.split("\\|");
+        return  res;
+    }
     public static class WIFI extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent){

@@ -40,25 +40,61 @@ public class ConditionQHelper {
         this.act_id = act_id;
         this.context = context;
     }
-    public void cHelper(String operation,String info,int type){
+    /**
+     * 返回>=0成功*/
+    public String cHelper(String operation,String info,int type){
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        String  Act_id =(new Integer(this.act_id)).toString();
+        String Type = (new Integer(type)).toString();
         switch (operation){
             case "INSERT":
-                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-                ContentValues insertValues = new ContentValues();
-                insertValues.put("info",info);
-                insertValues.put("act_id",this.act_id);
-                insertValues.put("connection_type",type);
-                insertValues.put("_deleted",0);
-                db.insert("activity_connection",null,insertValues);
-                break;
+                values.clear();
+                values.put("info",info);
+                values.put("act_id",this.act_id);
+                values.put("connection_type",type);
+                values.put("_deleted",0);
+                db.insert("activity_connection",null,values);
+                return "1";
             case "UPDATE":
-                break;
+                values.clear();
+                values.put("info",info);
+                values.put("connection_type",type);
+                db.update("activity_connection",values,"act_id =?",new String[]{Act_id});
+                return "1";
             case "QUERY":
-                break;
+                Cursor cursor = db.query("activity_connection",new String[]{"act_id","info"},"info =? AND connection_type =?",new String[]{info,Type},null,null,null);
+                if(cursor != null){
+                    if(cursor.moveToFirst()){
+                        String res = cursor.getString(cursor.getColumnIndexOrThrow("info"));
+                        cursor.close();
+                        return res;
+                    }
+                    cursor.close();
+                    return "1";
+                }
+                return "1";
             case "DELETE":
-                break;
+                db.delete("activity_connection","act_id =? AND info =? AND connection_type =?",new String[]{Act_id,info,Type});
+                return "1";
         }
+        return "-1";
 
+    }
+    /**
+     * 如果activity已绑定过condition且未被删除，返回false*/
+    public boolean checkCondition(String info,int type){
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        String  Act_id =(new Integer(act_id)).toString();
+        Cursor cursor = db.query("activity_connection",new String[]{"act_id","_deleted","info"},"act_id =?",new String[]{Act_id},null,null,null);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                if(cursor.getColumnIndexOrThrow("_deleted") == 0) {cursor.close();return false;}
+            }
+            cursor.close();
+            return true;
+        }
+        return true;
     }
 
 }

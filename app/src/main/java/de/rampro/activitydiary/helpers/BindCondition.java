@@ -59,22 +59,36 @@ public class BindCondition{
         return 0;
     }
 
-    private static int BindWIFI(int activity,Context context){
+    private static int BindWIFI(int act_id,Context context){
         String ssid = ConditionInfo.WIFI.getSSID(context);
         String bssid = ConditionInfo.WIFI.getBSSID(context);
         String info = ssid + "|" +bssid;
-        ConditionQHelper helper = new ConditionQHelper(activity,context);
-        /*show a window to confirm*/
-        helper.cHelper("INSERT",info,Condition_WIFI);             //插入wifi数据
-        Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
+        ConditionQHelper helper = new ConditionQHelper(act_id,context);
+//        /*test*/
+//        String res;
+//        helper.cHelper("INSERT",info,Condition_WIFI);
+//        res = helper.cHelper("QUERY",info,Condition_WIFI);
+//        Log.d("QUERY","info1: "+res);
+//        helper.cHelper("UPDATE","test",Condition_WIFI);
+//        res = helper.cHelper("QUERY","test",Condition_WIFI);
+//        Log.d("QUERY","info2: "+res);
+//        helper.cHelper("DELETE","test",Condition_WIFI);
+//        res = helper.cHelper("QUERY","test",Condition_WIFI);
+//        Log.d("QUERY","info3: "+res);
+//        /*test*/
+        if(helper.checkCondition(info,Condition_WIFI)){//检查该activity是否已绑定一个condition
+            /*show a window to confirm*/
+            helper.cHelper("INSERT",info,Condition_WIFI);             //插入wifi数据
+            Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
+        }
         return 1;
     }
 
     private static int BindBluetooth(int activity,Context context){
-        ArrayList<String> infos = ConditionInfo.Bluetooth.getInfos(context);
-        for(int i=0;i<infos.size();i=i+2){
-            Log.d("Name",infos.get(i));
-            Log.d("Mac",infos.get(i+1));
+        ArrayList<String> Binfos = ConditionInfo.Bluetooth.getInfos(context);
+        ArrayList<String> infos = new ArrayList<String>();
+        for(int i=0;i<Binfos.size();i=i+2){
+            infos.add(Binfos.get(i)+"|"+Binfos.get(i+1));
         }
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
         return 1;
