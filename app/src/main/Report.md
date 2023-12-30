@@ -75,14 +75,14 @@ interface DiaryLocationColumns extends DiaryLocationJoinableColumns
 
 interface DiaryLocationJoinableColumns
 
-    LATITUDE
-    LONGITUDE
-    ALTITUDE
-    TIMESTAMP
-    SPEED
-    HACC
-    VACC
-    SACC
+    LATITUDE 纬度
+    LONGITUDE 经度
+    ALTITUDE 海拔
+    TIMESTAMP 获取位置的时间戳
+    SPEED 速度
+    HACC 水平精度
+    VACC 垂直精度
+    SACC 速度精度
 
 class DiaryStats
 

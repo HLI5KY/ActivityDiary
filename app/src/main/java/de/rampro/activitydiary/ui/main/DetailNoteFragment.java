@@ -21,8 +21,12 @@ package de.rampro.activitydiary.ui.main;
 
 import androidx.lifecycle.ViewModelProviders;
 import androidx.databinding.DataBindingUtil;
+
+import android.app.Activity;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +47,16 @@ public class DetailNoteFragment extends Fragment {
         //here data must be an instance of the class MarsDataProvider
 
         DetailViewModel viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
+
+        Activity a=getActivity();
+        if(a instanceof MainActivity){
+            viewModel = ((MainActivity) a).getViewModel();
+            Log.d("viewModel", "Main NoteFrag onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
+        else if(a instanceof RecordActivity){
+            viewModel = ((RecordActivity) a).getViewModel();
+            Log.d("viewModel", "Record NoteFrag onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
 
         binding.setViewModel(viewModel);
         // Specify the current activity as the lifecycle owner.

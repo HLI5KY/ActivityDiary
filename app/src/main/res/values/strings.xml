@@ -201,6 +201,7 @@
     <string name="activity_title_no_selected_act">&lt;No Activity&gt;</string>
     <string name="dialog_title_note">Note</string>
     <string name="activities">Activities</string>
+    <string name="activity_title_record" translatable="false">Record</string>
 
     <string name="fragment_detail_stats_title">Statistics</string>
     <string name="fragment_detail_note_title">Note</string>

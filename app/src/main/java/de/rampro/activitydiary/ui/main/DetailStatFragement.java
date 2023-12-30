@@ -26,6 +26,8 @@ import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +67,18 @@ public class DetailStatFragement extends Fragment {
 
         view.findViewById(R.id.detail_content).setOnClickListener(headerClickHandler);
 
-        viewModel = ViewModelProviders.of(getActivity()/*, viewModelFactory TODO */).get(DetailViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(DetailViewModel.class);
+
+        Activity a=getActivity();
+        if(a instanceof MainActivity){
+            viewModel = ((MainActivity) a).getViewModel();
+            Log.d("viewModel", "Main StatFrag onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
+        else if(a instanceof RecordActivity){
+            viewModel = ((RecordActivity) a).getViewModel();
+            Log.d("viewModel", "Record StatFrag onCreateView: "+viewModel.mStartOfLast.getValue());
+        }
+
 
         binding.setViewModel(viewModel);
         // Specify the current activity as the lifecycle owner.
@@ -89,11 +102,16 @@ public class DetailStatFragement extends Fragment {
         if(a instanceof MainActivity){
             ((MainActivity)a).queryAllTotals();
         }
+//        else if(a instanceof RecordActivity){
+//            Log.d("viewModel", "RecordActivity upDateTextView");
+//            ((RecordActivity)a).queryAllTotals();
+//        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("viewModel", "onResume: "+viewModel.mStartOfLast.getValue());
         updateDurationTextView();
         updateDurationHandler.postDelayed(updateDurationRunnable, 10 * 1000);
     }
