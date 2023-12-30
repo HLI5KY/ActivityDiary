@@ -491,6 +491,7 @@ public class ActivityDiaryContract {
         public static final String _ID = "_id";
         public static final String _DELETED = "_deleted";
         public static final String CONNECTION_TYPE = "connection_type";
+        public static final String INFO = "info";
         public static final String ACT_ID = "act_id";
 //        public static final String URI = "uri";
 //        public static final String[] PROJECTION_ALL = {};

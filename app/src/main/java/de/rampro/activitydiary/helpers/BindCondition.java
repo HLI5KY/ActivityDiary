@@ -54,8 +54,11 @@ public class BindCondition{
     private static int BindWIFI(int activity,Context context){
             String ssid = ConditionInfo.WIFI.getSSID(context);
             String bssid = ConditionInfo.WIFI.getBSSID(context);
+            String info = ssid + "|" +bssid;
+
             Log.d("SSID",ssid);
             Log.d("BSSID",bssid);
+            Log.d("INFO",info);
             Toast.makeText(context, "test 1", Toast.LENGTH_LONG).show();
             return 1;
 
