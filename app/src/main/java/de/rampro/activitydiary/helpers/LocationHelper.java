@@ -31,6 +31,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -132,6 +133,8 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
         startInsert(0, null, ActivityDiaryContract.DiaryLocation.CONTENT_URI,
                 values);
 
+        Log.d("Latitude Changes to", String.valueOf(location.getLatitude()));  // 纬度
+        Log.d("Longitude Changes to", String.valueOf(location.getLongitude()));  // 经度
     }
 
     /**

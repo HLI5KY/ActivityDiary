@@ -142,7 +142,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
             /* upgrade from 4 to 5 */
             createRecentSuggestionsTable(db);
             createActivityConnectionTable(db);
-            createConnectionLocationTable(db);
+            // createConnectionLocationTable(db);
         }
 
 //        if (newVersion > 5) {
@@ -197,7 +197,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 "_id INTEGER PRIMARY KEY ASC, " +
                 "_deleted INTEGER DEFAULT 0, " +
                 "connection_type INTEGER DEFAULT 0, " +
-                "info Text, " +
+                "info TEXT DEFAULT NULL," +
                 "act_id INTEGER NOT NULL, " +
                 " FOREIGN KEY(act_id) REFERENCES activity(_id)" +
                 ");");
@@ -256,6 +256,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
 
     }
 
+    /*
     private void createConnectionLocationTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " +
                 "bind_location" +
@@ -269,4 +270,5 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 " FOREIGN KEY(act_id) REFERENCES activity(_id) " +
                 ");");
     }
+     */
 }

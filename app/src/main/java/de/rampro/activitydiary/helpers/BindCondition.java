@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import de.rampro.activitydiary.db.LocalDBHelper;
 import de.rampro.activitydiary.model.conditions.Condition;
 import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.helpers.ConditionInfo;
@@ -48,6 +49,7 @@ public class BindCondition{
     }
 
     public static int Bind(int type,int activity,Context context){
+        Unbind(activity, context);
         switch(type){
             case Condition_WIFI:
                 return BindWIFI(activity,context);
@@ -101,6 +103,17 @@ public class BindCondition{
         // Log.d("Altitude", infos.get(2));
         Toast.makeText(context, "test 3", Toast.LENGTH_LONG).show();
         return 1;
+    }
+
+    /**
+     * Unbind the activity if it has been bound to a connection.
+     */
+    private static void Unbind(int activity, Context context){
+        LocalDBHelper mLocalDBHelper = new LocalDBHelper(context);
+        String sql = "UPDATE " + "activity_connection" +
+                " SET " + "_deleted = 1" +
+                " WHERE " + "act_id = " + activity;
+        mLocalDBHelper.getWritableDatabase().execSQL(sql);
     }
 
 }
