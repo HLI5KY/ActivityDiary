@@ -75,6 +75,7 @@ public class ConditionInfo{
         public void onReceive(Context context, Intent intent){
             String action = intent.getAction();
             if(action != null){
+                ConditionQHelper helper = new ConditionQHelper(context);
                 switch (action){
                     case WifiManager.WIFI_STATE_CHANGED_ACTION:
                         int Wstate = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,0);
@@ -84,8 +85,7 @@ public class ConditionInfo{
                                 break;
                             case WifiManager.WIFI_STATE_DISABLED:
                                 Reference.CurrentWIFI = "";
-                                ConditionQHelper helper1 = new ConditionQHelper(context);
-                                int close_id = helper1.getCloseID(Condition_WIFI);
+                                int close_id = helper.getCloseID(Condition_WIFI);
                                 Log.d("WIFI_PARA","close_id: "+close_id);
                                 if(close_id >= 0) {
                                     ActivityHelper.helper.setCurrentActivity(null);
@@ -99,7 +99,14 @@ public class ConditionInfo{
                         if(!Reference.CurrentWIFI.equals(bssid) && !bssid.equals("") && !bssid.equals("00:00:00:00:00:00")){
                             Reference.CurrentWIFI = bssid;
                             String info = getSSID(context) + "|" + getBSSID(context);
-                            ConditionQHelper helper = new ConditionQHelper(context);
+                            DiaryActivity current = ActivityHelper.helper.getCurrentActivity();
+                            if(current != null){
+                                int close_id = current.getId();
+                                Log.d("WIFI_PARA","close_id: "+close_id);
+                                if(close_id >= 0) {
+                                    ActivityHelper.helper.setCurrentActivity(null);
+                                    /*关闭activity*/}
+                            }
                             int start_id = helper.cHelper("QUERY",info,Condition_WIFI);
                             if(start_id >= 0) {
                                 DiaryActivity newAct = helper.setActivity(start_id);
