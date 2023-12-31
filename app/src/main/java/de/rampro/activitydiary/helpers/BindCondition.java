@@ -49,24 +49,25 @@ public class BindCondition{
         public static String CurrentBluetooth = "";
     }
 
-    public static int Bind(int type,int activity,Context context){
-        // Unbind(activity, context);
+
+    public static int Bind(int type,String name,Context context){
         switch(type){
             case Condition_WIFI:
-                return BindWIFI(activity,context);
+                return BindWIFI(name,context);
             case Reference.Condition_Bluetooth:
-                return BindBluetooth(activity,context);
+                return BindBluetooth(name,context);
             case Reference.Condition_GPS:
-                return BindGPS(activity,context);
+                return BindGPS(name,context);
         }
         return 0;
     }
 
-    private static int BindWIFI(int act_id,Context context){
+    private static int BindWIFI(String name,Context context){
         String ssid = ConditionInfo.WIFI.getSSID(context);
         String bssid = ConditionInfo.WIFI.getBSSID(context);
         String info = ssid + "|" +bssid;
-        ConditionQHelper helper = new ConditionQHelper(act_id,context);
+        ConditionQHelper helper = new ConditionQHelper(context);
+        int act_id = helper.getID(name);
 //        /*test*/
 //        String res;
 //        helper.cHelper("INSERT",info,Condition_WIFI);
@@ -79,15 +80,15 @@ public class BindCondition{
 //        res = helper.cHelper("QUERY","test",Condition_WIFI);
 //        Log.d("QUERY","info3: "+res);
 //        /*test*/
-        if(helper.checkCondition(info,Condition_WIFI)){//检查该activity是否已绑定一个condition
+        if(helper.checkCondition(act_id)){//检查该activity是否已绑定一个condition
             /*show a window to confirm*/
-            helper.cHelper("INSERT",info,Condition_WIFI);             //插入wifi数据
+            helper.cHelper("INSERT",info,Condition_WIFI,act_id);             //插入wifi数据
             Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
         }
         return 1;
     }
 
-    private static int BindBluetooth(int activity,Context context){
+    private static int BindBluetooth(String name,Context context){
         ArrayList<String> Binfos = ConditionInfo.Bluetooth.getInfos(context);
         ArrayList<String> infos = new ArrayList<String>();
         for(int i=0;i<Binfos.size();i=i+2){
@@ -97,7 +98,7 @@ public class BindCondition{
         return 1;
     }
 
-    private static int BindGPS(int activity,Context context){
+    private static int BindGPS(String name,Context context){
         ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
         ConditionQHelper helper = new ConditionQHelper(activity, context);
 
@@ -116,10 +117,9 @@ public class BindCondition{
         return 1;
     }
 
-    /*
-     *
+    /**
      * Unbind the activity if it has been bound to a connection.
-     *
+     */
     private static void Unbind(int activity, Context context){
         LocalDBHelper mLocalDBHelper = new LocalDBHelper(context);
         String sql = "UPDATE " + "activity_connection" +
@@ -127,6 +127,5 @@ public class BindCondition{
                 " WHERE " + "act_id = " + activity;
         mLocalDBHelper.getWritableDatabase().execSQL(sql);
     }
-    */
 
 }
