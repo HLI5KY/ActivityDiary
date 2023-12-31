@@ -79,6 +79,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
 
     //Mycode
     private int Condition_Type =0;
+    private String name = "";
 
 
     //Mycode end
@@ -416,7 +417,6 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         conditionConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int activity=0;
                 boolean isAllGranted = checkPermissionAllGranted(
                         new String[] {
                                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -428,8 +428,10 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                         }
                         ,EditActivity.this);
                 if (isAllGranted) {// 如果这3个权限全都拥有, 则直接执行
-                    if(ConditionInfo.conditionCheck(EditActivity.this,Condition_Type))
-                        BindCondition.Bind(Condition_Type,activity,EditActivity.this);
+                    if(ConditionInfo.conditionCheck(EditActivity.this,Condition_Type)){
+                        name = mActivityName.getText().toString();
+                        Log.d("WIFI_NAME",name);
+                    }
                     else  Toast.makeText(EditActivity.this,"绑定失败，请连接WIFI/蓝牙/GPS",Toast.LENGTH_LONG).show();
                 }
                 else ActivityCompat.requestPermissions(EditActivity.this,new String[]{
@@ -562,6 +564,7 @@ git
                         finish();
                     }
                 }
+                BindCondition.Bind(Condition_Type,name,EditActivity.this);
                 break;
             case android.R.id.home:
                 finish();
