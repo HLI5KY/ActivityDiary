@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package de.rampro.activitydiary.helpers;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
 import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
 
@@ -49,7 +50,7 @@ public class BindCondition{
     }
 
     public static int Bind(int type,int activity,Context context){
-        Unbind(activity, context);
+        // Unbind(activity, context);
         switch(type){
             case Condition_WIFI:
                 return BindWIFI(activity,context);
@@ -98,16 +99,27 @@ public class BindCondition{
 
     private static int BindGPS(int activity,Context context){
         ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
-        Log.d("Latitude", infos.get(0));  // 纬度
-        Log.d("Longitude", infos.get(1));  // 经度
+        ConditionQHelper helper = new ConditionQHelper(activity, context);
+
+        int RANGE = 2;  // 纬度/2，经度/4
+
+        int latiInt = (int)(Double.parseDouble(infos.get(0)) * 1000);
+
+        // Log.d("Latitude", infos.get(0));  // 纬度
+        // Log.d("Longitude", infos.get(1));  // 经度
         // Log.d("Altitude", infos.get(2));
-        Toast.makeText(context, "test 3", Toast.LENGTH_LONG).show();
+        // Toast.makeText(context, "test 3", Toast.LENGTH_LONG).show();
+        if(helper.checkCondition(info, Condition_GPS)){
+            helper.cHelper("INSERT", info, Condition_GPS);
+            Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
+        }
         return 1;
     }
 
-    /**
+    /*
+     *
      * Unbind the activity if it has been bound to a connection.
-     */
+     *
     private static void Unbind(int activity, Context context){
         LocalDBHelper mLocalDBHelper = new LocalDBHelper(context);
         String sql = "UPDATE " + "activity_connection" +
@@ -115,5 +127,6 @@ public class BindCondition{
                 " WHERE " + "act_id = " + activity;
         mLocalDBHelper.getWritableDatabase().execSQL(sql);
     }
+    */
 
 }
