@@ -103,6 +103,8 @@ public class ConditionInfo{
                             int start_id = helper.cHelper("QUERY",info,Condition_WIFI);
                             if(start_id >= 0) {
                                 DiaryActivity newAct = helper.setActivity(start_id);
+                                int del = helper.getDel(newAct.getName());
+                                Log.d("WIFI_PARA","del: "+del);
                                 Log.d("WIFI_PARA","start_id: "+start_id);
                                 Log.d("WIFI_PARA","name: "+newAct.getName());
                                 Log.d("WIFI_PARA","color: "+newAct.getColor());
