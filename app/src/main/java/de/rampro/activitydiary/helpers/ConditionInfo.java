@@ -187,7 +187,16 @@ public class ConditionInfo{
                                 }
                                 for (String info : infos){
                                     int start_id = helper.cHelper("QUERY",info,Condition_Bluetooth);
-                                    if(start_id >= 0) {/*启动activity*/}
+                                    if(start_id >= 0) {
+                                        DiaryActivity newAct = helper.getActivity(start_id);
+                                        int del = helper.getDel(newAct.getName());
+                                        Log.d("Bluetooth_PARA","del: "+del);
+                                        Log.d("Bluetooth_PARA","start_id: "+start_id);
+                                        Log.d("Bluetooth_PARA","name: "+newAct.getName());
+                                        Log.d("Bluetooth_PARA","color: "+newAct.getColor());
+                                        Log.d("Bluetooth_PARA","_id: "+newAct.getId());
+                                        Log.d("Bluetooth_PARA","type: "+newAct.getConnection());
+                                        ActivityHelper.helper.setCurrentActivity(newAct);}
                                 }
                                 /*check 蓝牙是否有绑定activity
                                     有->启动

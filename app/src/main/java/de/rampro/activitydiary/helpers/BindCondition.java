@@ -119,8 +119,11 @@ public class BindCondition{
         ConditionQHelper helper = new ConditionQHelper(context);
         int act_id = helper.getID(name);
         if(!info.equals("")){
-            helper.cHelper("INSERT",info,Condition_WIFI,act_id);
+            helper.cHelper("INSERT",info,type,act_id);
         }
+        Log.d("finishBind","info: "+info);
+        Log.d("finishBind","type: "+type);
+        Log.d("finishBind","act_id: "+act_id);
     }
 
     private static String[] BindWIFI(String name,Context context){
@@ -166,7 +169,7 @@ public class BindCondition{
         for(int i=0;i<Binfos.size();i=i+2){
             infos.add(Binfos.get(i)+"|"+Binfos.get(i+1));
         }
-        String info ="";
+        String info =infos.get(0);
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
         return new String[]{""+Condition_Bluetooth,info};
     }
