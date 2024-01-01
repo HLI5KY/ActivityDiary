@@ -21,7 +21,6 @@ import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
 import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
-import static de.rampro.activitydiary.helpers.PopupWindows;
 
 import android.content.ContentValues;
 import android.content.Context;

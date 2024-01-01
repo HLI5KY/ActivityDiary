@@ -45,6 +45,11 @@ public class PopupWindows extends DialogFragment {
     private Context context;  // 填充用
     private AlertDialog alertDialog;  // 弹窗本体
 
+    PopupWindows(Context context1){
+        super();
+        context = context1;
+    }
+
     /**
      * 确认覆盖 Condition 的弹窗，只包含一条信息和确认/取消(OK/Cancel)按钮
      * @param type
@@ -72,10 +77,11 @@ public class PopupWindows extends DialogFragment {
                         res = 0;
                     }
                 })
-                .create();;
+                .create();
+
+        alertDialog.show();
 
         Log.d("Popup1", "res=" + res);
-        alertDialog.show();
         return res;
     }
 
@@ -123,6 +129,7 @@ public class PopupWindows extends DialogFragment {
         else
             res2 =  "ERROR";
 
+        Log.d("Popup2", "res2=" + res2);
         return res2;
     }
 
