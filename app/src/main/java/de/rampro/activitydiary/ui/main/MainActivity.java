@@ -410,7 +410,6 @@ public class MainActivity extends BaseActivity implements
     public void onItemClick(int adapterPosition) {
 //        runActivities = getRunActivities();
         DiaryActivity newAct = selectAdapter.item(adapterPosition);
-//        Collections.reverse(runActivities);
 //        if(newAct != ActivityHelper.helper.getCurrentActivity()) {
         if(!runActivities.contains(newAct)) {
 
@@ -466,7 +465,6 @@ public class MainActivity extends BaseActivity implements
 //            Log.d("Main", "view_size="+runActivities.size());
         }
 
-//        Collections.reverse(runActivities);
         refreshList();
 
         for (int i = 0; i < viewModels.size(); i++) {
@@ -870,6 +868,7 @@ public class MainActivity extends BaseActivity implements
         if(runActivities.contains(act)){return;}
         Collections.reverse(runActivities);
         runActivities.add(act);
+        ActivityHelper.helper.setCurrentActivity(act);
         Collections.reverse(runActivities);
     }
     public static void removeRunActivities(DiaryActivity act){

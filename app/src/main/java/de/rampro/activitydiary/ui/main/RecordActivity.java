@@ -255,12 +255,6 @@ public class RecordActivity extends BaseActivity implements NoteEditDialog.NoteE
         if(storageDir != null){
             File image = new File(storageDir, imageFileName + ".jpg");
             image.createNewFile();
-/* #80            File image = File.createTempFile(
-                    imageFileName,
-                    ".jpg",
-                    storageDir
-            );
-            */
             return image;
         }else{
             return null;
@@ -320,7 +314,6 @@ public class RecordActivity extends BaseActivity implements NoteEditDialog.NoteE
     }
 
     public void queryAllTotals() {
-        // TODO: move this into the DetailStatFragement
         DiaryActivity a = viewModel.mCurrentActivity.getValue();
         if (a != null) {
             int id = a.getId();
