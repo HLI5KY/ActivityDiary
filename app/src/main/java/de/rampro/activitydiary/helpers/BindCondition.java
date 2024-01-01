@@ -19,6 +19,7 @@
 package de.rampro.activitydiary.helpers;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
 import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
 
 import android.content.ContentValues;
@@ -47,6 +48,8 @@ public class BindCondition{
 
         public static String CurrentWIFI = "";
         public static String CurrentBluetooth = "";
+
+        public static int RANGE = 2;  // 纬度/2，经度/4，边长50m
     }
 
 
@@ -100,18 +103,24 @@ public class BindCondition{
 
     private static int BindGPS(String name,Context context){
         ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
-        ConditionQHelper helper = new ConditionQHelper(activity, context);
+        ConditionQHelper helper = new ConditionQHelper(context);
+        int act_id = helper.getID(name);
 
-        int RANGE = 2;  // 纬度/2，经度/4
+        // 策略是保留四位小数，然后投影除以RANGE
+        int latInt = (int)(Double.parseDouble(infos.get(0)) * 10000) / RANGE;
+        int lonInt = (int)(Double.parseDouble(infos.get(1)) * 10000) / RANGE / 2;
 
-        int latiInt = (int)(Double.parseDouble(infos.get(0)) * 1000);
+        String info = latInt + "|" + lonInt;
+        Log.d("GPS info", info);
 
         // Log.d("Latitude", infos.get(0));  // 纬度
         // Log.d("Longitude", infos.get(1));  // 经度
         // Log.d("Altitude", infos.get(2));
         // Toast.makeText(context, "test 3", Toast.LENGTH_LONG).show();
-        if(helper.checkCondition(info, Condition_GPS)){
-            helper.cHelper("INSERT", info, Condition_GPS);
+        if(helper.checkCondition(act_id)){
+            helper.cHelper("INSERT", info, Condition_GPS, act_id);
+            int res = helper.cHelper("QUERY", info, Condition_GPS);
+            Log.d("QUERY_GPS", ""+res);
             Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
         }
         return 1;
