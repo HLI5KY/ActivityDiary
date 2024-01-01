@@ -76,6 +76,8 @@ public class ActivityDiaryContentProvider extends ContentProvider {
     private static final int search_recent_suggestion = 12;
     private static final int search_suggestion = 13;
     private static final int diary_suggestion = 14;
+    private static final int activity_connection = 15;
+    private static final int activity_connection_ID = 16;
 
     private static final String TAG = ActivityDiaryContentProvider.class.getName();
 
@@ -115,6 +117,9 @@ public class ActivityDiaryContentProvider extends ContentProvider {
         /* TODO #18 */
         sUriMatcher.addURI(ActivityDiaryContract.AUTHORITY, "conditions", conditions);
         sUriMatcher.addURI(ActivityDiaryContract.AUTHORITY, "conditions/#", conditions_ID);
+
+        sUriMatcher.addURI(ActivityDiaryContract.AUTHORITY, ActivityDiaryContract.ActivityConnection.CONTENT_URI.getPath().replaceAll("^/+", ""), activity_connection);
+        sUriMatcher.addURI(ActivityDiaryContract.AUTHORITY, ActivityDiaryContract.ActivityConnection.CONTENT_URI.getPath().replaceAll("^/+", "") + "/#", activity_connection_ID);
 
     }
 
@@ -466,6 +471,10 @@ public class ActivityDiaryContentProvider extends ContentProvider {
                 table = ActivityDiaryContract.DiarySearchSuggestion.TABLE_NAME;
                 resultUri = ActivityDiaryContract.DiarySearchSuggestion.CONTENT_URI;
                 break;
+            case activity_connection:
+                table = ActivityDiaryContract.ActivityConnection.TABLE_NAME;
+                resultUri = ActivityDiaryContract.ActivityConnection.CONTENT_URI;
+                break;
             case conditions:
 //                table = ActivityDiaryContract.Condition.TABLE_NAME;
 // TODO #18               resultUri = ActivityDiaryContract.Condition.CONTENT_URI;
@@ -540,6 +549,12 @@ public class ActivityDiaryContentProvider extends ContentProvider {
                 /* fall though */
             case diary_location_ID:
                 table = ActivityDiaryContract.DiaryLocation.TABLE_NAME;
+                break;
+            case activity_connection:
+                isGlobalDelete = true;
+                /* fall though */
+            case activity_connection_ID:
+                table = ActivityDiaryContract.ActivityConnection.TABLE_NAME;
                 break;
             case diary_suggestion:
                 table = ActivityDiaryContract.DiarySearchSuggestion.TABLE_NAME;
@@ -619,6 +634,11 @@ public class ActivityDiaryContentProvider extends ContentProvider {
             case diary_location:
                 table = ActivityDiaryContract.DiaryLocation.TABLE_NAME;
                 break;
+            case activity_connection_ID:
+                isID = true;
+            case activity_connection:
+                table = ActivityDiaryContract.ActivityConnection.TABLE_NAME;
+                break;
             case conditions_ID:
                 isID = true;
 //                table = ActivityDiaryContract.Condition.TABLE_NAME;
@@ -642,6 +662,7 @@ public class ActivityDiaryContentProvider extends ContentProvider {
                 values,
                 selection,
                 selectionArgs);
+        Log.d("update",upds+" "+selection+" "+values);
         if (upds > 0) {
             getContext().
                     getContentResolver().

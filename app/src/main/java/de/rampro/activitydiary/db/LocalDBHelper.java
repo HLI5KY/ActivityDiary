@@ -31,7 +31,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
 
     public LocalDBHelper(Context context) {
         super(context, ActivityDiaryContract.AUTHORITY, null, CURRENT_VERSION);
-        onUpgrade(this.getWritableDatabase(),1,7);
+//        onUpgrade(this.getWritableDatabase(),1,7);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
                 ActivityDiaryContract.DiaryActivity.TABLE_NAME +
                 "(" + ActivityDiaryContract.DiaryActivity.NAME + "," + ActivityDiaryContract.DiaryActivity.COLOR + ")" +
                 " VALUES " +
-                " ('UpgradeTest', '" + Color.parseColor("#114514") + "');");
+                " ('Test', '" + Color.parseColor("#114514") + "');");
     }
 
     public static final int CURRENT_VERSION = 7;

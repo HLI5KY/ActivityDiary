@@ -21,6 +21,7 @@ package de.rampro.activitydiary.helpers;
 
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_Bluetooth;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
+import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -32,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
@@ -44,6 +46,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.BitmapKt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import de.rampro.activitydiary.ActivityDiaryApplication;
@@ -109,7 +113,7 @@ public class ConditionInfo{
                             }
                             int start_id = helper.cHelper("QUERY",info,Condition_WIFI);
                             if(start_id >= 0) {
-                                DiaryActivity newAct = helper.setActivity(start_id);
+                                DiaryActivity newAct = helper.getActivity(start_id);
                                 int del = helper.getDel(newAct.getName());
                                 Log.d("WIFI_PARA","del: "+del);
                                 Log.d("WIFI_PARA","start_id: "+start_id);
@@ -183,7 +187,16 @@ public class ConditionInfo{
                                 }
                                 for (String info : infos){
                                     int start_id = helper.cHelper("QUERY",info,Condition_Bluetooth);
-                                    if(start_id >= 0) {/*启动activity*/}
+                                    if(start_id >= 0) {
+                                        DiaryActivity newAct = helper.getActivity(start_id);
+                                        int del = helper.getDel(newAct.getName());
+                                        Log.d("Bluetooth_PARA","del: "+del);
+                                        Log.d("Bluetooth_PARA","start_id: "+start_id);
+                                        Log.d("Bluetooth_PARA","name: "+newAct.getName());
+                                        Log.d("Bluetooth_PARA","color: "+newAct.getColor());
+                                        Log.d("Bluetooth_PARA","_id: "+newAct.getId());
+                                        Log.d("Bluetooth_PARA","type: "+newAct.getConnection());
+                                        ActivityHelper.helper.setCurrentActivity(newAct);}
                                 }
                                 /*check 蓝牙是否有绑定activity
                                     有->启动

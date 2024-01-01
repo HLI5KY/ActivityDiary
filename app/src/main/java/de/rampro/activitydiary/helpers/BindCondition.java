@@ -17,9 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package de.rampro.activitydiary.helpers;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_Bluetooth;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
-import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.EXIST_ACTIVITY;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.EXIST_CONDITION;
 import static de.rampro.activitydiary.model.conditions.Condition.mOpenHelper;
 
 import android.content.ContentValues;
@@ -31,6 +34,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.rampro.activitydiary.db.LocalDBHelper;
 import de.rampro.activitydiary.model.conditions.Condition;
@@ -45,6 +50,8 @@ public class BindCondition{
         public static final int Condition_WIFI = 1;
         public static final int Condition_Bluetooth = 2;
         public static final int Condition_GPS = 3;
+        public static final String EXIST_CONDITION = "0";
+        public static final String EXIST_ACTIVITY = "1";
 
         public static String CurrentWIFI = "";
         public static String CurrentBluetooth = "";
@@ -52,8 +59,52 @@ public class BindCondition{
         public static int RANGE = 2;  // 纬度/2，经度/4，边长50m
     }
 
+    public static Map<String,String> checkExist(String name,String infos,String Type){
+        ConditionQHelper helper = new ConditionQHelper();
+        int act_id = helper.getID(name);
+        String bind_id;
+        String Act_id = (new Integer(act_id)).toString();
+        Map<String,String> map = new HashMap<>();
+        Cursor cursor;
+        if(act_id >= 0){//该activity是否已绑定condition
+            cursor = mOpenHelper.getReadableDatabase().query("activity_connection",new String[]{"info","connection_type","_deleted","act_id"},"act_id =?",new String[]{Act_id},null,null,null);
+            if(cursor != null){
+                if(cursor.moveToFirst()){
+                    String info = cursor.getString(cursor.getColumnIndexOrThrow("info"));
+                    String type = cursor.getString(cursor.getColumnIndexOrThrow("connection_type"));
+                    String id = cursor.getString(cursor.getColumnIndexOrThrow("act_id"));
+                    map.put("info",info);map.put("type",type);map.put("id",id);map.put("exist",EXIST_CONDITION);
+                    cursor.close();
+                    return map;
+                }
+                cursor.close();
+            }
+        }
+        //该condition是否已被别的activity绑定
+        cursor = mOpenHelper.getReadableDatabase().query("activity_connection",new String[]{"act_id"},"info =? And connection_type =?",new String[]{infos,Type},null,null,null);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                bind_id = cursor.getString(cursor.getColumnIndexOrThrow("act_id"));
+                cursor.close();
+                cursor = mOpenHelper.getReadableDatabase().query("activity",new String[]{"name","_deleted"},"_id =?",new String[]{bind_id},null,null,null);
+                if(cursor != null){
+                    if(cursor.moveToFirst()){
+                        if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0){
+                            String act_name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                            map.put("info",infos);map.put("type",Type);map.put("id",bind_id);map.put("exist",EXIST_ACTIVITY);map.put("name",act_name);
+                            cursor.close();
+                            return map;
+                        }
+                    }
+                    cursor.close();
+                }
+            }
+            else cursor.close();
+        }
 
-    public static int Bind(int type,String name,Context context){
+        return map;
+    }
+    public static String[] Bind(int type,String name,Context context){
         switch(type){
             case Condition_WIFI:
                 return BindWIFI(name,context);
@@ -62,15 +113,40 @@ public class BindCondition{
             case Reference.Condition_GPS:
                 return BindGPS(name,context);
         }
-        return 0;
+        return new String[]{};
+    }
+    public static void finishBind(int type,String info,String name,Context context){
+        ConditionQHelper helper = new ConditionQHelper(context);
+        int act_id = helper.getID(name);
+        if(!info.equals("")){
+            helper.cHelper("INSERT",info,type,act_id);
+        }
+        Log.d("finishBind","info: "+info);
+        Log.d("finishBind","type: "+type);
+        Log.d("finishBind","act_id: "+act_id);
     }
 
-    private static int BindWIFI(String name,Context context){
+    private static String[] BindWIFI(String name,Context context){
         String ssid = ConditionInfo.WIFI.getSSID(context);
         String bssid = ConditionInfo.WIFI.getBSSID(context);
         String info = ssid + "|" +bssid;
-        ConditionQHelper helper = new ConditionQHelper(context);
-        int act_id = helper.getID(name);
+        Map<String,String> exist = checkExist(name,info,""+Condition_WIFI);
+        if(exist.isEmpty()){
+            Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
+        }
+        else if(exist.get("exist").equals(EXIST_CONDITION)){
+            Log.d("EXIST_CONDITION","info: "+exist.get("info"));
+            Log.d("EXIST_CONDITION","id: "+exist.get("id"));
+            Log.d("EXIST_CONDITION","type: "+exist.get("type"));
+            /*弹窗*/
+        }
+        else{
+            Log.d("EXIST_ACTIVITY","info: "+exist.get("info"));
+            Log.d("EXIST_ACTIVITY","id: "+exist.get("id"));
+            Log.d("EXIST_ACTIVITY","type: "+exist.get("type"));
+            Log.d("EXIST_ACTIVITY","name: "+exist.get("name"));
+            /*弹窗*/
+        }
 //        /*test*/
 //        String res;
 //        helper.cHelper("INSERT",info,Condition_WIFI);
@@ -83,25 +159,22 @@ public class BindCondition{
 //        res = helper.cHelper("QUERY","test",Condition_WIFI);
 //        Log.d("QUERY","info3: "+res);
 //        /*test*/
-        if(helper.checkCondition(act_id)){//检查该activity是否已绑定一个condition
-            /*show a window to confirm*/
-            helper.cHelper("INSERT",info,Condition_WIFI,act_id);             //插入wifi数据
-            Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
-        }
-        return 1;
+
+        return new String[]{""+Condition_WIFI,info};
     }
 
-    private static int BindBluetooth(String name,Context context){
+    private static String[] BindBluetooth(String name,Context context){
         ArrayList<String> Binfos = ConditionInfo.Bluetooth.getInfos(context);
         ArrayList<String> infos = new ArrayList<String>();
         for(int i=0;i<Binfos.size();i=i+2){
             infos.add(Binfos.get(i)+"|"+Binfos.get(i+1));
         }
+        String info =infos.get(0);
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
-        return 1;
+        return new String[]{""+Condition_Bluetooth,info};
     }
 
-    private static int BindGPS(String name,Context context){
+    private static String[] BindGPS(String name,Context context){
         ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
         ConditionQHelper helper = new ConditionQHelper(context);
         int act_id = helper.getID(name);
@@ -123,18 +196,17 @@ public class BindCondition{
             Log.d("QUERY_GPS", ""+res);
             Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
         }
-
-        return 1;
+        return new String[]{""+Condition_GPS,info};
     }
 
     /**
      * Unbind the activity if it has been bound to a connection.
      */
-    private static void Unbind(int activity, Context context){
+    public static void Unbind(int act_id, Context context){
         LocalDBHelper mLocalDBHelper = new LocalDBHelper(context);
         String sql = "UPDATE " + "activity_connection" +
                 " SET " + "_deleted = 1" +
-                " WHERE " + "act_id = " + activity;
+                " WHERE " + "act_id = " + act_id;
         mLocalDBHelper.getWritableDatabase().execSQL(sql);
     }
 

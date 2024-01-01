@@ -19,34 +19,36 @@
 
 package de.rampro.activitydiary.model;
 
-public class DiaryActivity{
+public class DiaryActivity implements Cloneable{
     private String mName;
     private int mId;
     private int mColor;
     private int mConnection;
+    private boolean running;
     public DiaryActivity(int id, String name, int color, int connection){
         mId = id;
         mName = name;
         mColor = color;
         mConnection = connection;
+        running = false;
     }
 
     public String getName(){
         return mName;
     }
     public void setName(String name){ mName = name;}
-
     public int getColor(){
         return mColor;
     }
     public void setColor(int color){ mColor = color;}
-
     public int getId() { return mId;}
     public void setId(int id) { mId = id;}
     public int getConnection(){
         return mConnection;
     }
     public void setConnection(int connection){ mConnection = connection;}
+    public boolean getRunning(){return running;}
+    public void setRunning(boolean  b){running=b;}
 
     public boolean equals(Object other){
         return other != null && other instanceof DiaryActivity && ((DiaryActivity)other).getName().equals(mName);
@@ -60,5 +62,15 @@ public class DiaryActivity{
     @Override
     public int hashCode(){
         return mId;
+    }
+
+    @Override
+    public Object clone(){
+        try{
+            return (DiaryActivity) super.clone();
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 }

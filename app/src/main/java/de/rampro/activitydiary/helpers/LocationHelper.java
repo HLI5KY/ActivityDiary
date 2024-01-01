@@ -165,7 +165,7 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
 
         if(dest_id >= 0) {
             if (needchange) {
-                DiaryActivity dest_act = qHelper.setActivity(dest_id);
+                DiaryActivity dest_act = qHelper.getActivity(dest_id);
                 ActivityHelper.helper.setCurrentActivity(dest_act);
                 Log.d("GPS_start", dest_act.getName() + " " + dest_act.getId());
             }

@@ -41,6 +41,7 @@ public class ConditionQHelper {
     public ConditionQHelper(Context context){
         this.context = context;
     }
+    public ConditionQHelper(){}
     /**
      * 返回>=0成功*/
     public int cHelper(String operation,String info,int type,int act_id){
@@ -92,7 +93,8 @@ public class ConditionQHelper {
         Cursor cursor = db.query("activity_connection",new String[]{"act_id","_deleted","info"},"act_id =?",new String[]{Act_id},null,null,null);
         if(cursor != null){
             if(cursor.moveToFirst()){
-                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted"))  == 0) {cursor.close();return false;}
+//                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted"))  == 0) {cursor.close();return false;}
+                cursor.close();return false;
             }
             cursor.close();
             return true;
@@ -105,10 +107,10 @@ public class ConditionQHelper {
         Cursor cursor = db.query("activity_connection",new String[]{"act_id","_deleted","connection_type"},"connection_type =?",new String[]{Type},null,null,null);
         if(cursor != null){
             if(cursor.moveToFirst()){
-                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0) {
+//                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0) {
                     int act_id = cursor.getInt(cursor.getColumnIndexOrThrow("act_id"));
                     cursor.close();
-                    return act_id;}
+                    return act_id;
             }
             cursor.close();
             return -1;
@@ -120,10 +122,10 @@ public class ConditionQHelper {
         Cursor cursor = db.query("activity_connection",new String[]{"act_id","_deleted","connection_type"},"info =?",new String[]{info},null,null,null);
         if(cursor != null){
             if(cursor.moveToFirst()){
-                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0) {
+//                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0) {
                     int act_id = cursor.getInt(cursor.getColumnIndexOrThrow("act_id"));
                     cursor.close();
-                    return act_id;}
+                    return act_id;
             }
             cursor.close();
             return -1;
@@ -131,16 +133,16 @@ public class ConditionQHelper {
         return -1;
     }
 
-    public DiaryActivity setActivity(int act_id){
+    public DiaryActivity getActivity(int act_id){
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         String Act_id = (new Integer(act_id)).toString();
         int type=-1; String name = ""; int color = 0;
         Cursor cursor = db.query("activity_connection",new String[]{"act_id","_deleted","connection_type"},"act_id =?",new String[]{Act_id},null,null,null);
         if(cursor != null){
             if(cursor.moveToFirst()){
-                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0) {
+//                if(cursor.getInt(cursor.getColumnIndexOrThrow("_deleted")) == 0) {
                     type = cursor.getInt(cursor.getColumnIndexOrThrow("connection_type"));
-                    }
+
             }
         }
         cursor = db.query("activity",new String[]{"_id","name","color"},"_id =?",new String[]{Act_id},null,null,null);
