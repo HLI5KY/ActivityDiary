@@ -147,6 +147,7 @@ public class BindCondition{
         PopupWindows pop = new PopupWindows(context);
         ConditionQHelper helper = new ConditionQHelper();
         if(exist.isEmpty()){
+            bindInfo = info;
             Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
         }
         else if(exist.get("exist").equals(EXIST_CONDITION)){
