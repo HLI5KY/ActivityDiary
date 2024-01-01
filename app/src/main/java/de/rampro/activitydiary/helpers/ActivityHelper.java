@@ -458,7 +458,12 @@ public class ActivityHelper extends AsyncQueryHandler{
             notificationManager = NotificationManagerCompat.from(ActivityDiaryApplication.getAppContext());
 
             Intent intent = new Intent(ActivityDiaryApplication.getAppContext(), MainActivity.class);
-            PendingIntent pIntent = PendingIntent.getActivity(ActivityDiaryApplication.getAppContext(), (int) System.currentTimeMillis(), intent, 0);
+            PendingIntent pIntent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                pIntent = PendingIntent.getActivity(ActivityDiaryApplication.getAppContext(), (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_MUTABLE);
+            }else{
+                pIntent = PendingIntent.getActivity(ActivityDiaryApplication.getAppContext(), (int) System.currentTimeMillis(), intent, 0);
+            }
             notificationBuilder.setContentIntent(pIntent);
             updateNotification();
         }else{
@@ -497,7 +502,12 @@ public class ActivityHelper extends AsyncQueryHandler{
 
                         Intent intent = new Intent(ActivityDiaryApplication.getAppContext(), MainActivity.class);
                         intent.putExtra("SELECT_ACTIVITY_WITH_ID", act.getId());
-                        PendingIntent pIntent = PendingIntent.getActivity(ActivityDiaryApplication.getAppContext(), (int) System.currentTimeMillis(), intent, 0);
+                        PendingIntent pIntent;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                            pIntent = PendingIntent.getActivity(ActivityDiaryApplication.getAppContext(), (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_MUTABLE);
+                        }else{
+                            pIntent = PendingIntent.getActivity(ActivityDiaryApplication.getAppContext(), (int) System.currentTimeMillis(), intent, 0);
+                        }
                         NotificationCompat.Action a = new NotificationCompat.Action(R.drawable.ic_nav_select, coloredActivity, pIntent);
                         a.getExtras().putInt("SELECT_ACTIVITY_WITH_ID", act.getId());
                         notificationBuilder.addAction(a);
