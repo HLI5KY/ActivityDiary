@@ -81,9 +81,8 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
     //Mycode
     private int Condition_Type =0;
     private String name = "";
-    private String info = "";
     private int currentID = -1;
-
+    private RadioGroup setCondition;
 
     //Mycode end
 
@@ -382,7 +381,8 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         //Mycode
 
 //        加载activity连接类型
-        RadioGroup setCondition = (RadioGroup) findViewById(R.id.edit_activity_condition_Group);
+        setCondition = (RadioGroup) findViewById(R.id.edit_activity_condition_Group);
+        setCondition.check(-1);
         if(currentActivity != null){
             switch(currentActivity.getConnection()){
                 case BindCondition.Reference.Condition_WIFI:
@@ -436,10 +436,10 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                         if(currentActivity != null){
                             currentID = currentActivity.getId();
                         }
-                        String[] infos;
-                        infos = BindCondition.Bind(Condition_Type,name,EditActivity.this);
-                        if(infos.length>0){
-                            info = infos[1];
+                        try {
+                            BindCondition.Bind(Condition_Type,name,EditActivity.this);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         }
                         Log.d("WIFI_NAME",name);
                     }
@@ -520,7 +520,7 @@ git
             mNavigationView.getMenu().findItem(R.id.nav_add_activity).setChecked(true);
         }
         ActivityHelper.helper.registerDataChangeListener(this);
-
+        setCondition.check(-1);
         super.onResume();
     }
 
@@ -575,7 +575,8 @@ git
                         finish();
                     }
                 }
-                BindCondition.finishBind(Condition_Type,info,name,EditActivity.this);
+                BindCondition.delBind();
+                BindCondition.finishBind(Condition_Type,name,EditActivity.this);
                 break;
             case android.R.id.home:
                 finish();

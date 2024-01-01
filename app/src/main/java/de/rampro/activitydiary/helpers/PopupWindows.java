@@ -19,6 +19,10 @@
 
 package de.rampro.activitydiary.helpers;
 
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_Bluetooth;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,6 +32,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+
+import java.util.Map;
+import java.util.concurrent.Future;
 
 import de.rampro.activitydiary.R;
 
@@ -40,7 +47,6 @@ public class PopupWindows {
 
     private int type;
     private boolean mulInfo;  // 是否为多info
-    private int res = -1;  // “覆盖”弹窗的返回值
     private int index = -2;  // 选择弹窗的返回值的索引
     private Context context;  // 填充用
     private AlertDialog alertDialog;  // 弹窗本体
@@ -54,35 +60,95 @@ public class PopupWindows {
      * @param type
      * @param info 弹窗的内容
      */
-    public void confirmOwConnection (int type, String info){
-        res = -1;
-        String infoShow = info;  // 弹窗正文，可以根据需要再修改
-        String title = "Condition Overwrite Confirm";
 
+    public void confirmOwConnection (int type, Map<String,String> exist, String info) throws InterruptedException {
+        String existInfo = exist.get("info");
+        String[] detailInfo = ConditionInfo.resolveInfo(existInfo);
+        String infoShow ="";   // 弹窗正文，可以根据需要再修改
+        String title = "已存在启动条件";
+        switch (type){
+            case Condition_WIFI:
+                infoShow = "类型: "+"WIFI"+"\n"+
+                        "名称: " + detailInfo[0]+"\n"+
+                        "地址: " + detailInfo[1];
+                break;
+            case Condition_Bluetooth:
+                infoShow = "类型: "+"蓝牙"+"\n"+
+                        "名称: " + detailInfo[0]+"\n"+
+                        "地址: " + detailInfo[1];
+                break;
+            case Condition_GPS:
+                infoShow = "类型: "+"GPS"+"\n"+
+                        "经度: " + detailInfo[0]+"\n"+
+                        "纬度: " + detailInfo[1];
+                break;
+        }
         alertDialog = new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(infoShow)
                 .setIcon(R.mipmap.ic_launcher)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {  // OK按钮
+                .setPositiveButton("覆盖", new DialogInterface.OnClickListener() {  // OK按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        res = 1;
-                        Handle1(res);
+                        BindCondition.delInfo = exist;
+                        BindCondition.bindInfo = info;
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  // Cancel按钮
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {  // Cancel按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        res = 0;
-                        Handle1(res);
+                        BindCondition.bindInfo = "";
+                    }
+                })
+                .create();
+        alertDialog.show();
+    }
+    public void confirmOwActivity (int type, Map<String,String> exist,String info,String name) throws InterruptedException {
+        String existInfo = exist.get("info");
+        String[] detailInfo = ConditionInfo.resolveInfo(existInfo);
+        String infoShow ="";   // 弹窗正文，可以根据需要再修改
+        String title = "该启动条件已被绑定";
+        switch (type){
+            case Condition_WIFI:
+                infoShow = "活动： " + name+"\n"+
+                        "类型: "+"WIFI"+"\n"+
+                        "名称: " + detailInfo[0]+"\n"+
+                        "地址: " + detailInfo[1];
+                break;
+            case Condition_Bluetooth:
+                infoShow = "活动： " + name+"\n"+
+                        "类型: "+"蓝牙"+"\n"+
+                        "名称: " + detailInfo[0]+"\n"+
+                        "地址: " + detailInfo[1];
+                break;
+            case Condition_GPS:
+                infoShow = "活动： " + name+"\n"+
+                        "类型: "+"GPS"+"\n"+
+                        "经度: " + detailInfo[0]+"\n"+
+                        "纬度: " + detailInfo[1];
+                break;
+        }
+        alertDialog = new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(infoShow)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton("覆盖", new DialogInterface.OnClickListener() {  // OK按钮
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BindCondition.delInfo = exist;
+                        BindCondition.bindInfo = info;
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {  // Cancel按钮
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BindCondition.bindInfo ="";
                     }
                 })
                 .create();
 
         alertDialog.show();
 
-        // Log.d("Popup1", "res=" + res);
-        // return res;
     }
 
     /**

@@ -58,7 +58,8 @@ public class BindCondition{
 
         public static int RANGE = 2;  // 纬度/2，经度/4，边长50m
     }
-
+    public static String bindInfo="";
+    public static Map<String,String> delInfo= new HashMap<>();
     public static Map<String,String> checkExist(String name,String infos,String Type){
         ConditionQHelper helper = new ConditionQHelper();
         int act_id = helper.getID(name);
@@ -104,7 +105,7 @@ public class BindCondition{
 
         return map;
     }
-    public static String[] Bind(int type,String name,Context context){
+    public static int Bind(int type,String name,Context context) throws InterruptedException {
         switch(type){
             case Condition_WIFI:
                 return BindWIFI(name,context);
@@ -113,9 +114,10 @@ public class BindCondition{
             case Reference.Condition_GPS:
                 return BindGPS(name,context);
         }
-        return new String[]{};
+        return 0;
     }
-    public static void finishBind(int type,String info,String name,Context context){
+    public static void finishBind(int type,String name,Context context){
+        String info = bindInfo;
         ConditionQHelper helper = new ConditionQHelper(context);
         int act_id = helper.getID(name);
         if(!info.equals("")){
@@ -125,22 +127,37 @@ public class BindCondition{
         Log.d("finishBind","type: "+type);
         Log.d("finishBind","act_id: "+act_id);
     }
-
-    private static String[] BindWIFI(String name,Context context){
+    public static void delBind(){
+        Map<String,String> exist = delInfo;
+        ConditionQHelper helper= new ConditionQHelper();
+        if(!exist.isEmpty()){
+            helper.cHelper("DELETE",exist.get("info"),Integer.valueOf(exist.get("type")),Integer.valueOf(exist.get("id")));
+            delInfo.clear();
+        }
+    }
+    /**
+     * @param name 当前activity的名字
+     * @param context
+     * @return 如果进行覆盖，返回String[]{type,info},否则返回String[]{}*/
+    private static int BindWIFI(String name,Context context) throws InterruptedException {
         String ssid = ConditionInfo.WIFI.getSSID(context);
         String bssid = ConditionInfo.WIFI.getBSSID(context);
         String info = ssid + "|" +bssid;
         Map<String,String> exist = checkExist(name,info,""+Condition_WIFI);
+        PopupWindows pop = new PopupWindows(context);
+        ConditionQHelper helper = new ConditionQHelper();
         if(exist.isEmpty()){
             Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
         }
         else if(exist.get("exist").equals(EXIST_CONDITION)){
+            pop.confirmOwConnection(Condition_WIFI,exist,info);
             Log.d("EXIST_CONDITION","info: "+exist.get("info"));
             Log.d("EXIST_CONDITION","id: "+exist.get("id"));
             Log.d("EXIST_CONDITION","type: "+exist.get("type"));
             /*弹窗*/
         }
         else{
+            pop.confirmOwActivity(Condition_WIFI,exist,info,exist.get("name"));
             Log.d("EXIST_ACTIVITY","info: "+exist.get("info"));
             Log.d("EXIST_ACTIVITY","id: "+exist.get("id"));
             Log.d("EXIST_ACTIVITY","type: "+exist.get("type"));
@@ -159,11 +176,10 @@ public class BindCondition{
 //        res = helper.cHelper("QUERY","test",Condition_WIFI);
 //        Log.d("QUERY","info3: "+res);
 //        /*test*/
-
-        return new String[]{""+Condition_WIFI,info};
+        return 1;
     }
 
-    private static String[] BindBluetooth(String name,Context context){
+    private static int BindBluetooth(String name,Context context){
         ArrayList<String> Binfos = ConditionInfo.Bluetooth.getInfos(context);
         ArrayList<String> infos = new ArrayList<String>();
         for(int i=0;i<Binfos.size();i=i+2){
@@ -171,10 +187,10 @@ public class BindCondition{
         }
         String info =infos.get(0);
         Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
-        return new String[]{""+Condition_Bluetooth,info};
+        return 1;
     }
 
-    private static String[] BindGPS(String name,Context context){
+    private static int BindGPS(String name,Context context){
         ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
         ConditionQHelper helper = new ConditionQHelper(context);
         int act_id = helper.getID(name);
@@ -197,11 +213,8 @@ public class BindCondition{
             Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
         }
 
-        // test PopupWindows
-        // PopupWindows test = new PopupWindows(context);
-        // test.chooseFromInfo(1, new String[]{"1", "2", "3"});
+        return 1;
 
-        return new String[]{""+Condition_GPS,info};
     }
 
     /**
