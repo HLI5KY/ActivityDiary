@@ -57,6 +57,7 @@ import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 import de.rampro.activitydiary.ActivityDiaryApplication;
 import android.Manifest;
@@ -80,6 +81,8 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
     //Mycode
     private int Condition_Type =0;
     private String name = "";
+    private String info = "";
+    private int currentID = -1;
 
 
     //Mycode end
@@ -430,6 +433,14 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                 if (isAllGranted) {// 如果这3个权限全都拥有, 则直接执行
                     if(ConditionInfo.conditionCheck(EditActivity.this,Condition_Type)){
                         name = mActivityName.getText().toString();
+                        if(currentActivity != null){
+                            currentID = currentActivity.getId();
+                        }
+                        String[] infos;
+                        infos = BindCondition.Bind(Condition_Type,name,EditActivity.this);
+                        if(infos.length>0){
+                            info = infos[1];
+                        }
                         Log.d("WIFI_NAME",name);
                     }
                     else  Toast.makeText(EditActivity.this,"绑定失败，请连接WIFI/蓝牙/GPS",Toast.LENGTH_LONG).show();
@@ -564,7 +575,7 @@ git
                         finish();
                     }
                 }
-                BindCondition.Bind(Condition_Type,name,EditActivity.this);
+                BindCondition.finishBind(Condition_Type,info,name,EditActivity.this);
                 break;
             case android.R.id.home:
                 finish();
