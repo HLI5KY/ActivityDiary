@@ -105,6 +105,7 @@ public class ActivityHelper extends AsyncQueryHandler{
     private static final String SELECTION = ActivityDiaryContract.DiaryActivity._DELETED + "=0";
 
     public static final ActivityHelper helper = new ActivityHelper();
+    public static final List<ActivityHelper> helpers = new ArrayList<>();
     private static final String CURRENT_ACTIVITY_CHANNEL_ID = "CurrentActivity";
     private static final int CURRENT_ACTIVITY_NOTIFICATION_ID = 0;
 
@@ -265,7 +266,7 @@ public class ActivityHelper extends AsyncQueryHandler{
     }
 
     /* Access only allowed via ActivityHelper.helper singleton */
-    private ActivityHelper(){
+    public ActivityHelper(){
         super(ActivityDiaryApplication.getAppContext().getContentResolver());
         mDataChangeListeners = new ArrayList<DataChangedListener>(3);
         activities = new ArrayList<DiaryActivity>();

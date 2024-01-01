@@ -33,7 +33,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -46,6 +45,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,10 +70,10 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -87,6 +87,7 @@ import de.rampro.activitydiary.helpers.GraphicsHelper;
 import de.rampro.activitydiary.helpers.TimeSpanFormatter;
 import de.rampro.activitydiary.model.DetailViewModel;
 import de.rampro.activitydiary.model.DiaryActivity;
+import de.rampro.activitydiary.model.conditions.ViewModel;
 import de.rampro.activitydiary.ui.generic.BaseActivity;
 import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.ui.settings.SettingsActivity;
@@ -96,6 +97,7 @@ import de.rampro.activitydiary.ui.settings.SettingsActivity;
  *
  * */
 public class MainActivity extends BaseActivity implements
+        MultiRecyclerViewAdapter.MultiListener,
         SelectRecyclerViewAdapter.SelectListener,
         ActivityHelper.DataChangedListener,
         NoteEditDialog.NoteEditDialogListener,
@@ -109,10 +111,14 @@ public class MainActivity extends BaseActivity implements
     private static final int QUERY_CURRENT_ACTIVITY_STATS = 1;
     private static final int QUERY_CURRENT_ACTIVITY_TOTAL = 2;
 
-    private static DetailViewModel viewModel;
-    private static List<DetailViewModel> viewModels;
+    private DetailViewModel viewModel;
+    private static List<DetailViewModel> viewModels = new ArrayList<>();
+    private static List<DiaryActivity> runActivities = new ArrayList<>();
     private String mCurrentPhotoPath;
 
+    private RecyclerView multiRecyclerView;
+    private LinearLayoutManager multiLayoutManager;
+    private MultiRecyclerViewAdapter multiAdapter;
     private RecyclerView selectRecyclerView;
     private StaggeredGridLayoutManager selectorLayoutManager;
     private SelectRecyclerViewAdapter selectAdapter;
@@ -129,9 +135,9 @@ public class MainActivity extends BaseActivity implements
 
     private void setSearchMode(boolean searchMode){
         if(searchMode){
-            headerView.setVisibility(View.GONE);
-            fabNoteEdit.hide();
-            fabAttachPicture.hide();
+//            headerView.setVisibility(View.GONE);
+//            fabNoteEdit.hide();
+//            fabAttachPicture.hide();
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
             ((StaggeredGridLayoutManager)selectRecyclerView.getLayoutManager()).setSpanCount(searchRowCount);
 
@@ -139,9 +145,9 @@ public class MainActivity extends BaseActivity implements
             ((StaggeredGridLayoutManager)selectRecyclerView.getLayoutManager()).setSpanCount(normalRowCount);
 
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-            headerView.setVisibility(View.VISIBLE);
-            fabNoteEdit.show();
-            fabAttachPicture.show();
+//            headerView.setVisibility(View.VISIBLE);
+//            fabNoteEdit.show();
+//            fabAttachPicture.show();
         }
 
     }
@@ -173,29 +179,26 @@ public class MainActivity extends BaseActivity implements
 
         setContent(contentView);
 
-        headerView = findViewById(R.id.header_area);
-        tabLayout = findViewById(R.id.tablayout);
+//        headerView = findViewById(R.id.header_area);
 
-        viewPager = findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
-        tabLayout.setupWithViewPager(viewPager);
-
+        runActivities.clear();
+        multiRecyclerView = findViewById(R.id.multi_activities);
         selectRecyclerView = findViewById(R.id.select_recycler);
 
-        View selector = findViewById(R.id.activity_background);
-        selector.setOnLongClickListener(this);
-        selector.setOnClickListener(v -> {
-            // TODO: get rid of this setting?
-            if(PreferenceManager
-                    .getDefaultSharedPreferences(ActivityDiaryApplication.getAppContext())
-                    .getBoolean(SettingsActivity.KEY_PREF_DISABLE_CURRENT, true)){
-                ActivityHelper.helper.setCurrentActivity(null);
-            }else{
-//                Intent i = new Intent(MainActivity.this, HistoryDetailActivity.class);
-//                // no diaryEntryID will edit the last one
-//                startActivity(i);
-            }
-        });
+//        View selector = findViewById(R.id.activity_background);
+//        selector.setOnLongClickListener(this);
+//        selector.setOnClickListener(v -> {
+//            // TODO: get rid of this setting?
+//            if(PreferenceManager
+//                    .getDefaultSharedPreferences(ActivityDiaryApplication.getAppContext())
+//                    .getBoolean(SettingsActivity.KEY_PREF_DISABLE_CURRENT, true)){
+//                ActivityHelper.helper.setCurrentActivity(null);
+//            }else{
+////                Intent i = new Intent(MainActivity.this, HistoryDetailActivity.class);
+////                // no diaryEntryID will edit the last one
+////                startActivity(i);
+//            }
+//        });
 
         TypedValue value = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.listPreferredItemHeightSmall, value, true);
@@ -206,68 +209,72 @@ public class MainActivity extends BaseActivity implements
         searchRowCount = normalRowCount - 2;
         if(searchRowCount <= 0) searchRowCount = 1;
 
+        multiLayoutManager = new LinearLayoutManager(this);
+        multiLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        multiRecyclerView.setLayoutManager(multiLayoutManager);
+
         selectorLayoutManager = new StaggeredGridLayoutManager(normalRowCount, StaggeredGridLayoutManager.HORIZONTAL);
         selectRecyclerView.setLayoutManager(selectorLayoutManager);
         getSupportActionBar().setSubtitle(getResources().getString(R.string.activity_subtitle_main));
 
         likelyhoodSort();
 
-        fabNoteEdit = (FloatingActionButton) findViewById(R.id.fab_edit_note);
-        fabAttachPicture = (FloatingActionButton) findViewById(R.id.fab_attach_picture);
-
-        fabNoteEdit.setOnClickListener(v -> {
-            // Handle the click on the FAB
-            if(viewModel.currentActivity().getValue() != null) {
-                NoteEditDialog dialog = new NoteEditDialog();
-                dialog.setText(viewModel.mNote.getValue());
-                dialog.show(getSupportFragmentManager(), "NoteEditDialogFragment");
-            }else{
-                Toast.makeText(MainActivity.this, getResources().getString(R.string.no_active_activity_error), Toast.LENGTH_LONG).show();
-            }
-        });
-
-        fabAttachPicture.setOnClickListener(v -> {
-            // Handle the click on the FAB
-            if(viewModel.currentActivity() != null) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                        Log.i(TAG, "create file for image capture " + (photoFile == null ? "" : photoFile.getAbsolutePath()));
-
-                    } catch (IOException ex) {
-                        // Error occurred while creating the File
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.camera_error), Toast.LENGTH_LONG).show();
-                    }
-                    // Continue only if the File was successfully created
-                    if (photoFile != null) {
-                        // Save a file: path for use with ACTION_VIEW intents
-                        mCurrentPhotoPath = photoFile.getAbsolutePath();
-
-                        Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
-                                BuildConfig.APPLICATION_ID + ".fileprovider",
-                                photoFile);
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                    }
-
-                }
-            }else{
-                Toast.makeText(MainActivity.this, getResources().getString(R.string.no_active_activity_error), Toast.LENGTH_LONG).show();
-            }
-        });
-
-        fabNoteEdit.show();
+//        fabNoteEdit = (FloatingActionButton) findViewById(R.id.fab_edit_note);
+//        fabAttachPicture = (FloatingActionButton) findViewById(R.id.fab_attach_picture);
+//
+//        fabNoteEdit.setOnClickListener(v -> {
+//            // Handle the click on the FAB
+//            if(viewModel.currentActivity().getValue() != null) {
+//                NoteEditDialog dialog = new NoteEditDialog();
+//                dialog.setText(viewModel.mNote.getValue());
+//                dialog.show(getSupportFragmentManager(), "NoteEditDialogFragment");
+//            }else{
+//                Toast.makeText(MainActivity.this, getResources().getString(R.string.no_active_activity_error), Toast.LENGTH_LONG).show();
+//            }
+//        });
+//
+//        fabAttachPicture.setOnClickListener(v -> {
+//            // Handle the click on the FAB
+//            if(viewModel.currentActivity() != null) {
+//                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//
+//                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+//                    File photoFile = null;
+//                    try {
+//                        photoFile = createImageFile();
+//                        Log.i(TAG, "create file for image capture " + (photoFile == null ? "" : photoFile.getAbsolutePath()));
+//
+//                    } catch (IOException ex) {
+//                        // Error occurred while creating the File
+//                        Toast.makeText(MainActivity.this, getResources().getString(R.string.camera_error), Toast.LENGTH_LONG).show();
+//                    }
+//                    // Continue only if the File was successfully created
+//                    if (photoFile != null) {
+//                        // Save a file: path for use with ACTION_VIEW intents
+//                        mCurrentPhotoPath = photoFile.getAbsolutePath();
+//
+//                        Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
+//                                BuildConfig.APPLICATION_ID + ".fileprovider",
+//                                photoFile);
+//                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+//                        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+//                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//                    }
+//
+//                }
+//            }else{
+//                Toast.makeText(MainActivity.this, getResources().getString(R.string.no_active_activity_error), Toast.LENGTH_LONG).show();
+//            }
+//        });
+//
+//        fabNoteEdit.show();
         PackageManager pm = getPackageManager();
 
-        if(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            fabAttachPicture.show();
-        }else{
-            fabAttachPicture.hide();
-        }
+//        if(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+//            fabAttachPicture.show();
+//        }else{
+//            fabAttachPicture.hide();
+//        }
 
         // Get the intent, verify the action and get the search query
         Intent intent = getIntent();
@@ -337,6 +344,12 @@ public class MainActivity extends BaseActivity implements
 
         selectAdapter.notifyDataSetChanged(); // redraw the complete recyclerview
         ActivityHelper.helper.evaluateAllConditions(); // this is quite heavy and I am not so sure whether it is a good idea to do it unconditionally here...
+
+//        Log.d("Main", "onResume size="+runActivities.size());
+//        for(int i=0;i<runActivities.size();i++){
+//            DiaryActivity act = runActivities.get(i);
+//            if(act!=null){Log.d("Main", act.getName()+" "+act.getConnection());}
+//        }
     }
 
     @Override
@@ -346,27 +359,30 @@ public class MainActivity extends BaseActivity implements
         super.onPause();
     }
 
+    @Override
+    public boolean onLongClick(View v){return false;}
+
     /*
     * 原功能: 点击顶部卡片后,若当前有正在记录的Activity，则跳转至编辑页
     * 修改功能: 跳转至该Activity的记录页
     */
     @Override
-    public boolean onLongClick(View view) {
-        //MyCode
-        Intent i = new Intent(MainActivity.this, RecordActivity.class);
-        if(viewModel.currentActivity().getValue() != null) {
-//            i.putExtra("activityViewModel", (Parcelable) viewModel);
-            i.putExtra("activityID", viewModel.currentActivity().getValue().getId());
-            i.putExtra("activityName", viewModel.currentActivity().getValue().getName());
-            i.putExtra("activityColor", viewModel.currentActivity().getValue().getColor());
+    public boolean onTagLongClick(int adapterPosition) {
+        DiaryActivity act = multiAdapter.item(adapterPosition);
 
+
+        Intent i = new Intent(MainActivity.this, RecordActivity.class);
+        if(act != null) {
+            i.putExtra("activityID", act.getId());
+            i.putExtra("activityName", act.getName());
+            i.putExtra("activityColor", act.getColor());
             startActivity(i);
             return true;
         }else{
             Toast.makeText(this,"no running activity", Toast.LENGTH_SHORT).show();
             return false;
         }
-        //End
+
 //        Intent i = new Intent(MainActivity.this, EditActivity.class);
 //        if(viewModel.currentActivity().getValue() != null) {
 //            i.putExtra("activityID", viewModel.currentActivity().getValue().getId());
@@ -374,6 +390,9 @@ public class MainActivity extends BaseActivity implements
 //        startActivity(i);
 //        return true;
     }
+
+    @Override
+    public void onTagClick(int adapterPosition){}
 
     @Override
     public boolean onItemLongClick(int adapterPosition){
@@ -387,7 +406,10 @@ public class MainActivity extends BaseActivity implements
     public void onItemClick(int adapterPosition) {
 
         DiaryActivity newAct = selectAdapter.item(adapterPosition);
-        if(newAct != ActivityHelper.helper.getCurrentActivity()) {
+        Collections.reverse(runActivities);
+//        if(newAct != ActivityHelper.helper.getCurrentActivity()) {
+        if(!runActivities.contains(newAct)) {
+            runActivities.add(newAct);
 
             ActivityHelper.helper.setCurrentActivity(newAct);
 
@@ -419,14 +441,22 @@ public class MainActivity extends BaseActivity implements
             undoSnackBar.show();
         }else{
             /* clicked the currently active activity in the list, so let's terminate it due to #176 */
+            runActivities.remove(newAct);
             ActivityHelper.helper.setCurrentActivity(null);
         }
+
+        Collections.reverse(runActivities);
+        Log.d("Main",""+runActivities.size());
+        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
+        multiRecyclerView.setAdapter(multiAdapter);
     }
 
     public void onActivityChanged(){
+        DiaryActivity oldAct = null;
+        if(viewModel.currentActivity().getValue() != null){oldAct = viewModel.currentActivity().getValue();}
+
         DiaryActivity newAct = ActivityHelper.helper.getCurrentActivity();
         viewModel.mCurrentActivity.setValue(newAct);
-
         if(newAct != null) {
             mQHandler.startQuery(QUERY_CURRENT_ACTIVITY_STATS, null,
                     ActivityDiaryContract.DiaryActivity.CONTENT_URI,
@@ -447,7 +477,7 @@ public class MainActivity extends BaseActivity implements
         }
 
         viewModel.setCurrentDiaryUri(ActivityHelper.helper.getCurrentDiaryUri());
-        TextView aName = findViewById(R.id.activity_name);
+//        TextView aName = findViewById(R.id.activity_name);
         // TODO: move this logic into the DetailViewModel??
 
         viewModel.mAvgDuration.setValue("-");
@@ -456,9 +486,9 @@ public class MainActivity extends BaseActivity implements
         /* stats are updated after query finishes in mQHelper */
 
         if(viewModel.currentActivity().getValue() != null) {
-            aName.setText(viewModel.currentActivity().getValue().getName());
-            findViewById(R.id.activity_background).setBackgroundColor(viewModel.currentActivity().getValue().getColor());
-            aName.setTextColor(GraphicsHelper.textColorOnBackground(viewModel.currentActivity().getValue().getColor()));
+//            aName.setText(viewModel.currentActivity().getValue().getName());
+//            findViewById(R.id.activity_background).setBackgroundColor(viewModel.currentActivity().getValue().getColor());
+//            aName.setTextColor(GraphicsHelper.textColorOnBackground(viewModel.currentActivity().getValue().getColor()));
             viewModel.mNote.setValue(ActivityHelper.helper.getCurrentNote());
         }else{
             int col;
@@ -467,13 +497,30 @@ public class MainActivity extends BaseActivity implements
             }else {
                 col = ActivityDiaryApplication.getAppContext().getResources().getColor(R.color.colorPrimary);
             }
-            aName.setText(getResources().getString(R.string.activity_title_no_selected_act));
-            findViewById(R.id.activity_background).setBackgroundColor(col);
-            aName.setTextColor(GraphicsHelper.textColorOnBackground(col));
+//            aName.setText(getResources().getString(R.string.activity_title_no_selected_act));
+//            findViewById(R.id.activity_background).setBackgroundColor(col);
+//            aName.setTextColor(GraphicsHelper.textColorOnBackground(col));
             viewModel.mDuration.setValue("-");
             viewModel.mNote.setValue("");
         }
         selectorLayoutManager.scrollToPosition(0);
+
+
+        //test
+
+        if(viewModel.currentActivity().getValue() != null){
+            Log.d("Main", "add viewModel:"+viewModel.currentActivity().getValue().getName());
+
+            viewModels.add(viewModel);
+//            DiaryActivity act = viewModel.currentActivity().getValue();
+//            for(int i=0;i<runActivities.size();i++){
+//                Log.d("Main", "runAct"+i+" "+runActivities.get(i).getName());
+//            }
+        }
+//
+//        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
+//        multiRecyclerView.setAdapter(multiAdapter);
+
     }
 
     public void queryAllTotals() {
@@ -788,6 +835,7 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
-    public static DetailViewModel getViewModel(){return viewModel;}
+    public DetailViewModel getViewModel(){return this.viewModel;}
+    public static List<DetailViewModel> getViewModels(){return viewModels;}
 
 }

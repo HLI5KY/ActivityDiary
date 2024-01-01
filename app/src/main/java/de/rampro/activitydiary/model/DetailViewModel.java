@@ -27,7 +27,7 @@ import android.net.Uri;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 
 /* the viewmodel for the details of a diary entry */
-public class DetailViewModel extends ViewModel {
+public class DetailViewModel extends ViewModel implements Cloneable{
     public MutableLiveData<String> mNote;
     public MutableLiveData<String> mDuration;
     public MutableLiveData<String> mAvgDuration;
@@ -85,4 +85,17 @@ public class DetailViewModel extends ViewModel {
             mDiaryEntryId.setValue(Long.parseLong(mDiaryUri.getLastPathSegment()));
         }
     }
+
+    @Override
+    public Object clone(){
+        DetailViewModel d = null;
+        try{
+            d = (DetailViewModel) super.clone();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+//        d.mCurrentActivity.setValue((DiaryActivity)mCurrentActivity.clone());
+        return d;
+    }
+
 }
