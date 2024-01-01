@@ -94,6 +94,8 @@ public class DetailViewModel extends ViewModel implements Cloneable{
         }catch (Exception e){
             e.printStackTrace();
         }
+//        d.mNote.setValue((String)mNote.clone());
+//        d.mDuration.setValue( mDuration.clone());
 //        d.mCurrentActivity.setValue((DiaryActivity)mCurrentActivity.clone());
         return d;
     }

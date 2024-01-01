@@ -66,11 +66,12 @@ public class DiaryActivity implements Cloneable{
 
     @Override
     public Object clone(){
+        DiaryActivity act =null;
         try{
-            return (DiaryActivity) super.clone();
+            act = (DiaryActivity) super.clone();
         }catch (Exception e){
             e.printStackTrace();
-            return null;
         }
+        return act;
     }
 }
