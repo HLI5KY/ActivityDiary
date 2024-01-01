@@ -36,7 +36,7 @@ import de.rampro.activitydiary.R;
  * <p>+ 确认覆盖 Condition 的弹窗
  * <p>+ 显示多条可选信息的弹窗
  */
-public class PopupWindows extends DialogFragment {
+public class PopupWindows {
 
     private int type;
     private boolean mulInfo;  // 是否为多info
@@ -45,18 +45,16 @@ public class PopupWindows extends DialogFragment {
     private Context context;  // 填充用
     private AlertDialog alertDialog;  // 弹窗本体
 
-    PopupWindows(Context context1){
-        super();
-        context = context1;
+    PopupWindows(Context _context){
+        context = _context;
     }
 
     /**
      * 确认覆盖 Condition 的弹窗，只包含一条信息和确认/取消(OK/Cancel)按钮
      * @param type
      * @param info 弹窗的内容
-     * @return 1代表点击确认，0代表点击取消，-1异常
      */
-    public int confirmOwConnection (int type, String info){
+    public void confirmOwConnection (int type, String info){
         res = -1;
         String infoShow = info;  // 弹窗正文，可以根据需要再修改
         String title = "Condition Overwrite Confirm";
@@ -69,29 +67,30 @@ public class PopupWindows extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         res = 1;
+                        Handle1(res);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  // Cancel按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         res = 0;
+                        Handle1(res);
                     }
                 })
                 .create();
 
         alertDialog.show();
 
-        Log.d("Popup1", "res=" + res);
-        return res;
+        // Log.d("Popup1", "res=" + res);
+        // return res;
     }
 
     /**
      * 从多个选项中选择一个的弹窗
      * @param type
      * @param info 包含多个选项
-     * @return String类型，info 中的一个如果选择确认；或null如果选择取消；或ERROR如果异常
      */
-    public String chooseFromInfo(int type, String[] info){
+    public void chooseFromInfo(int type, String[] info){
         index = -2;
         String[] infoShow = info;  // 同上，可以修改
         String title = "Please Choose One";
@@ -108,29 +107,52 @@ public class PopupWindows extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {  // OK按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
+                        if (index == -2) {
+                            index = -1;
+                            Handle2(null);
+                        }
+                        else {
+                            Handle2(info[index]);
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  // Cancel按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         index = -1;
+                        Handle2(null);
                     }
                 })
                 .create();
         alertDialog.show();
 
-        String res2;
+        // String res2;
 
-        if(index >= 0)
-            res2 =  info[index];
-        else if(index == -1)
-            res2 =  null;
-        else
-            res2 =  "ERROR";
+        // if(index >= 0)
+            // res2 =  info[index];
+        // else if(index == -1)
+            // res2 =  null;
+        // else
+            // res2 =  "ERROR";
 
-        Log.d("Popup2", "res2=" + res2);
-        return res2;
+        // Log.d("Popup2", "res2=" + res2);
+        // return res2;
+    }
+
+    /**
+     * 处理确认覆盖的方法（仅作样例）
+     * @param res 1 点击 OK, 0 点击 Cancel
+     */
+    void Handle1(int res){
+        Log.d("Handle1", res+"");
+    }
+
+    /**
+     * 处理选择的方法（仅作样例）
+     * @param res 选项
+     */
+    void Handle2(String res){
+        Log.d("Handle2", res);
     }
 
 }

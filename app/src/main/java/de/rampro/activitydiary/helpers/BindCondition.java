@@ -196,6 +196,11 @@ public class BindCondition{
             Log.d("QUERY_GPS", ""+res);
             Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
         }
+
+        // test PopupWindows
+        // PopupWindows test = new PopupWindows(context);
+        // test.chooseFromInfo(1, new String[]{"1", "2", "3"});
+
         return new String[]{""+Condition_GPS,info};
     }
 
