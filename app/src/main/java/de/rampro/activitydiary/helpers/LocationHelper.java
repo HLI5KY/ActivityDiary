@@ -46,6 +46,8 @@ import androidx.preference.PreferenceManager;
 import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 import de.rampro.activitydiary.model.DiaryActivity;
+import de.rampro.activitydiary.ui.main.MainActivity;
+import de.rampro.activitydiary.ui.main.MultiAct;
 import de.rampro.activitydiary.ui.settings.SettingsActivity;
 
 public class LocationHelper extends AsyncQueryHandler implements LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -167,6 +169,8 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
             if (needchange) {
                 DiaryActivity dest_act = qHelper.getActivity(dest_id);
                 ActivityHelper.helper.setCurrentActivity(dest_act);
+                // 加入MainActivity的多任务列表
+                MainActivity.addRunActivities(dest_act);
                 Log.d("GPS_start", dest_act.getName() + " " + dest_act.getId());
             }
             else {

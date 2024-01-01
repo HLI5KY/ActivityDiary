@@ -33,6 +33,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -112,14 +113,14 @@ public class MainActivity extends BaseActivity implements
     private static final int QUERY_CURRENT_ACTIVITY_STATS = 1;
     private static final int QUERY_CURRENT_ACTIVITY_TOTAL = 2;
 
-    private DetailViewModel viewModel;
+    private static DetailViewModel viewModel;
     private static List<DetailViewModel> viewModels = new ArrayList<>();
     private static List<DiaryActivity> runActivities = new ArrayList<>();
     private String mCurrentPhotoPath;
 
-    private RecyclerView multiRecyclerView;
-    private LinearLayoutManager multiLayoutManager;
-    private MultiRecyclerViewAdapter multiAdapter;
+    private static RecyclerView multiRecyclerView;
+    private static LinearLayoutManager multiLayoutManager;
+    private static MultiRecyclerViewAdapter multiAdapter;
     private RecyclerView selectRecyclerView;
     private StaggeredGridLayoutManager selectorLayoutManager;
     private SelectRecyclerViewAdapter selectAdapter;
@@ -133,6 +134,9 @@ public class MainActivity extends BaseActivity implements
     private ViewPager viewPager;
     private TabLayout tabLayout;
     private View headerView;
+
+    public static Handler handler = new Handler();
+    public static Runnable runnable;
 
     private void setSearchMode(boolean searchMode){
         if(searchMode){
@@ -269,7 +273,7 @@ public class MainActivity extends BaseActivity implements
 //        });
 //
 //        fabNoteEdit.show();
-        PackageManager pm = getPackageManager();
+//        PackageManager pm = getPackageManager();
 
 //        if(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
 //            fabAttachPicture.show();
@@ -290,6 +294,19 @@ public class MainActivity extends BaseActivity implements
         //mycode
 // TODO: this is crazy to call onActivityChagned here, as it reloads the statistics and refills the viewModel... Completely against the idea of the viewmodel :-(
         onActivityChanged(); /* do this at the very end to ensure that no Loader finishes its data loading before */
+
+        // 自动刷新多任务列表
+
+        int interval = 10000;
+        runnable = new Runnable(){
+            @Override
+            public void run(){
+                refreshList();
+                handler.postDelayed(this, interval);
+            }
+        };
+        handler.postDelayed(runnable, interval);
+
     }
 
     private File createImageFile() throws IOException {
@@ -342,15 +359,8 @@ public class MainActivity extends BaseActivity implements
         ActivityHelper.helper.registerDataChangeListener(this);
         onActivityChanged(); /* refresh the current activity data */
         super.onResume();
-
         selectAdapter.notifyDataSetChanged(); // redraw the complete recyclerview
         ActivityHelper.helper.evaluateAllConditions(); // this is quite heavy and I am not so sure whether it is a good idea to do it unconditionally here...
-
-//        Log.d("Main", "onResume size="+runActivities.size());
-//        for(int i=0;i<runActivities.size();i++){
-//            DiaryActivity act = runActivities.get(i);
-//            if(act!=null){Log.d("Main", act.getName()+" "+act.getConnection());}
-//        }
     }
 
     @Override
@@ -371,7 +381,6 @@ public class MainActivity extends BaseActivity implements
     public boolean onTagLongClick(int adapterPosition) {
         DiaryActivity act = multiAdapter.item(adapterPosition);
 
-
         Intent i = new Intent(MainActivity.this, RecordActivity.class);
         if(act != null) {
             i.putExtra("activityID", act.getId());
@@ -384,12 +393,6 @@ public class MainActivity extends BaseActivity implements
             return false;
         }
 
-//        Intent i = new Intent(MainActivity.this, EditActivity.class);
-//        if(viewModel.currentActivity().getValue() != null) {
-//            i.putExtra("activityID", viewModel.currentActivity().getValue().getId());
-//        }
-//        startActivity(i);
-//        return true;
     }
 
     @Override
@@ -405,19 +408,23 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onItemClick(int adapterPosition) {
-
+//        runActivities = getRunActivities();
         DiaryActivity newAct = selectAdapter.item(adapterPosition);
-        Collections.reverse(runActivities);
+//        Collections.reverse(runActivities);
 //        if(newAct != ActivityHelper.helper.getCurrentActivity()) {
         if(!runActivities.contains(newAct)) {
-            runActivities.add(newAct);
 
+            addRunActivities(newAct);
+//            Log.d("Main","add "+newAct.getName());
             ActivityHelper.helper.setCurrentActivity(newAct);
+            onActivityChanged();
+            addViewModels(viewModel);
+//            Log.d("Main","add viewModel "+viewModel.currentActivity().getValue().getName());
+//            Log.d("Main", "act_size="+runActivities.size());
+//            Log.d("Main", "view_size="+runActivities.size());
 
             searchView.setQuery("", false);
             searchView.setIconified(true);
-
-
             SpannableStringBuilder snackbarText = new SpannableStringBuilder();
             snackbarText.append(newAct.getName());
             int end = snackbarText.length();
@@ -442,22 +449,42 @@ public class MainActivity extends BaseActivity implements
             undoSnackBar.show();
         }else{
             /* clicked the currently active activity in the list, so let's terminate it due to #176 */
+
             runActivities.remove(newAct);
-            ActivityHelper.helper.setCurrentActivity(null);
+//            Log.d("Main","remove "+newAct.getName());
+            if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+            else{ActivityHelper.helper.setCurrentActivity(null);}
+
+            for(int i=0;i<viewModels.size();i++){
+                DiaryActivity act = viewModels.get(i).currentActivity().getValue();
+                if(act!=null && act.getId()==newAct.getId()){
+//                    Log.d("Main","remove viewModel "+newAct.getName());
+                    viewModels.remove(viewModels.get(i));
+                }
+            }
+//            Log.d("Main", "act_size="+runActivities.size());
+//            Log.d("Main", "view_size="+runActivities.size());
         }
 
-        Collections.reverse(runActivities);
-        Log.d("Main",""+runActivities.size());
-        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
-        multiRecyclerView.setAdapter(multiAdapter);
+//        Collections.reverse(runActivities);
+        refreshList();
+
+        for (int i = 0; i < viewModels.size(); i++) {
+            if (viewModels.get(i).mCurrentActivity.getValue() != null) {
+                Log.d("Main", "" + viewModels.get(i).currentActivity().getValue().getName());
+            }
+        }
     }
 
     public void onActivityChanged(){
         DiaryActivity oldAct = null;
         if(viewModel.currentActivity().getValue() != null){oldAct = viewModel.currentActivity().getValue();}
+//        if(oldAct!=null)Log.d("Main","oldAct="+oldAct.getName());
 
         DiaryActivity newAct = ActivityHelper.helper.getCurrentActivity();
         viewModel.mCurrentActivity.setValue(newAct);
+//        if(newAct!=null)Log.d("Main","newAct="+newAct.getName());
+
         if(newAct != null) {
             mQHandler.startQuery(QUERY_CURRENT_ACTIVITY_STATS, null,
                     ActivityDiaryContract.DiaryActivity.CONTENT_URI,
@@ -505,22 +532,6 @@ public class MainActivity extends BaseActivity implements
             viewModel.mNote.setValue("");
         }
         selectorLayoutManager.scrollToPosition(0);
-
-
-        //test
-
-        if(viewModel.currentActivity().getValue() != null){
-            Log.d("Main", "add viewModel:"+viewModel.currentActivity().getValue().getName());
-
-            viewModels.add(viewModel);
-//            DiaryActivity act = viewModel.currentActivity().getValue();
-//            for(int i=0;i<runActivities.size();i++){
-//                Log.d("Main", "runAct"+i+" "+runActivities.get(i).getName());
-//            }
-        }
-//
-//        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
-//        multiRecyclerView.setAdapter(multiAdapter);
 
     }
 
@@ -838,5 +849,33 @@ public class MainActivity extends BaseActivity implements
 
     public DetailViewModel getViewModel(){return this.viewModel;}
     public static List<DetailViewModel> getViewModels(){return viewModels;}
-
+    public static void addViewModels(DetailViewModel v){
+        DetailViewModel temp = new DetailViewModel();
+        if(v.currentActivity().getValue() != null){
+            //不能直接传整个对象(因为是浅拷贝), DetailViewModel的Clone方法实现起来有丶麻烦, 只好一个个传数据...
+            temp.mCurrentActivity.setValue((DiaryActivity) v.currentActivity().getValue().clone());
+            temp.mNote.setValue(v.mNote.getValue());
+            temp.mDuration.setValue(v.mDuration.getValue());
+            temp.mAvgDuration.setValue(v.mAvgDuration.getValue());
+            temp.mStartOfLast.setValue(v.mStartOfLast.getValue());
+            temp.mTotalToday.setValue(v.mTotalToday.getValue());
+            temp.mTotalWeek.setValue(v.mTotalWeek.getValue());
+            temp.mTotalMonth.setValue(v.mTotalMonth.getValue());
+            temp.mDiaryEntryId.setValue(v.mDiaryEntryId.getValue());
+        }
+        viewModels.add(temp);
+    }
+    public static List<DiaryActivity> getRunActivities(){return runActivities;}
+    public static void addRunActivities(DiaryActivity act){
+        Collections.reverse(runActivities);
+        runActivities.add(act);
+        Collections.reverse(runActivities);
+    }
+    public static void removeRunActivities(DiaryActivity act){
+        runActivities.remove(act);
+    }
+    public void refreshList(){
+        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
+        multiRecyclerView.setAdapter(multiAdapter);
+    }
 }

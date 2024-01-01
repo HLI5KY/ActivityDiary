@@ -22,6 +22,7 @@ package de.rampro.activitydiary.ui.main;
 import android.Manifest;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +42,7 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -77,7 +79,7 @@ import de.rampro.activitydiary.ui.main.DetailStatFragement;
 import de.rampro.activitydiary.ui.main.MainActivity;
 import de.rampro.activitydiary.ui.settings.SettingsActivity;
 
-public class RecordActivity extends BaseActivity {
+public class RecordActivity extends BaseActivity implements NoteEditDialog.NoteEditDialogListener{
     private DiaryActivity currentActivity;
     private static DetailViewModel viewModel;
     private ViewPager viewPager;
@@ -117,7 +119,8 @@ public class RecordActivity extends BaseActivity {
         for(int j=0;j<viewModels.size();j++){
             if(viewModels.get(j).currentActivity().getValue().getId()==actId){
                 viewModel = MainActivity.getViewModels().get(j);
-                Log.d("viewModel", "get viewModel from MainActivity: " + viewModel.mCurrentActivity.getValue().getName());
+                Log.d("Record", "get viewModel from MainActivity: " + viewModel.mCurrentActivity.getValue().getName());
+                Log.d("Record", "" + viewModel.mDiaryEntryId.getValue());
             }
         }
 
@@ -265,82 +268,97 @@ public class RecordActivity extends BaseActivity {
 
     }
 
-//    private RecordActivity.MainAsyncQueryHandler mQHandler = new RecordActivity.MainAsyncQueryHandler(ActivityDiaryApplication.getAppContext().getContentResolver());
+    @Override
+    public void onNoteEditPositiveClock(String str, DialogFragment dialog) {
+        ContentValues values = new ContentValues();
+        values.put(ActivityDiaryContract.Diary.NOTE, str);
 
-//    private class MainAsyncQueryHandler extends AsyncQueryHandler {
-//        public MainAsyncQueryHandler(ContentResolver cr) {
-//            super(cr);
-//        }
-//        @Override
-//        public void startQuery(int token, Object cookie, Uri uri, String[] projection, String selection, String[] selectionArgs, String orderBy) {
-//            super.startQuery(token, cookie, uri, projection, selection, selectionArgs, orderBy);
-//        }
-//        @Override
-//        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-//            super.onQueryComplete(token, cookie, cursor);
-//            if ((cursor != null) && cursor.moveToFirst()) {
-//                if (token == QUERY_CURRENT_ACTIVITY_TOTAL) {
-//                    RecordActivity.StatParam p = (RecordActivity.StatParam) cookie;
-//                    long total = cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryStats.DURATION));
-//
-//                    String x = DateHelper.dateFormat(p.field).format(p.end);
-//                    x = x + ": " + TimeSpanFormatter.format(total);
-//                    switch (p.field) {
-//                        case Calendar.DAY_OF_YEAR:
-//                            viewModel.mTotalToday.setValue(x);
-//                            break;
-//                        case Calendar.WEEK_OF_YEAR:
-//                            viewModel.mTotalWeek.setValue(x);
-//                            break;
-//                        case Calendar.MONTH:
-//                            viewModel.mTotalMonth.setValue(x);
-//                            break;
-//                    }
-//                }
-//            }
-//        }
-//    }
+        mQHandler.startUpdate(0,
+                null,
+                viewModel.getCurrentDiaryUri(),
+                values,
+                null, null);
 
-//    public void queryAllTotals() {
-//        // TODO: move this into the DetailStatFragement
-//        DiaryActivity a = viewModel.mCurrentActivity.getValue();
-//        if (a != null) {
-//            int id = a.getId();
-//
-//            long end = System.currentTimeMillis();
-//            queryTotal(Calendar.DAY_OF_YEAR, end, id);
-//            queryTotal(Calendar.WEEK_OF_YEAR, end, id);
-//            queryTotal(Calendar.MONTH, end, id);
-//        }
-//    }
-//    private void queryTotal(int field, long end, int actID) {
-//        Calendar calStart = DateHelper.startOf(field, end);
-//        long start = calStart.getTimeInMillis();
-//        Uri u = ActivityDiaryContract.DiaryStats.CONTENT_URI;
-//        u = Uri.withAppendedPath(u, Long.toString(start));
-//        u = Uri.withAppendedPath(u, Long.toString(end));
-//
-//        mQHandler.startQuery(QUERY_CURRENT_ACTIVITY_TOTAL, new RecordActivity.StatParam(field, end),
-//                u,
-//                new String[]{
-//                        ActivityDiaryContract.DiaryStats.DURATION
-//                },
-//                ActivityDiaryContract.DiaryActivity.TABLE_NAME + "." + ActivityDiaryContract.DiaryActivity._ID
-//                        + " = ?",
-//                new String[]{
-//                        Integer.toString(actID)
-//                },
-//                null);
-//    }
-//    private class StatParam {
-//        public int field;
-//        public long end;
-//
-//        public StatParam(int field, long end) {
-//            this.field = field;
-//            this.end = end;
-//        }
-//    }
+        viewModel.mNote.postValue(str);
+        ActivityHelper.helper.setCurrentNote(str);
+    }
+
+    private RecordActivity.MainAsyncQueryHandler mQHandler = new RecordActivity.MainAsyncQueryHandler(ActivityDiaryApplication.getAppContext().getContentResolver());
+
+    private class MainAsyncQueryHandler extends AsyncQueryHandler {
+        public MainAsyncQueryHandler(ContentResolver cr) {
+            super(cr);
+        }
+        @Override
+        public void startQuery(int token, Object cookie, Uri uri, String[] projection, String selection, String[] selectionArgs, String orderBy) {
+            super.startQuery(token, cookie, uri, projection, selection, selectionArgs, orderBy);
+        }
+        @Override
+        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+            super.onQueryComplete(token, cookie, cursor);
+            if ((cursor != null) && cursor.moveToFirst()) {
+                if (token == QUERY_CURRENT_ACTIVITY_TOTAL) {
+                    RecordActivity.StatParam p = (RecordActivity.StatParam) cookie;
+                    long total = cursor.getLong(cursor.getColumnIndexOrThrow(ActivityDiaryContract.DiaryStats.DURATION));
+
+                    String x = DateHelper.dateFormat(p.field).format(p.end);
+                    x = x + ": " + TimeSpanFormatter.format(total);
+                    switch (p.field) {
+                        case Calendar.DAY_OF_YEAR:
+                            viewModel.mTotalToday.setValue(x);
+                            break;
+                        case Calendar.WEEK_OF_YEAR:
+                            viewModel.mTotalWeek.setValue(x);
+                            break;
+                        case Calendar.MONTH:
+                            viewModel.mTotalMonth.setValue(x);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void queryAllTotals() {
+        // TODO: move this into the DetailStatFragement
+        DiaryActivity a = viewModel.mCurrentActivity.getValue();
+        if (a != null) {
+            int id = a.getId();
+
+            long end = System.currentTimeMillis();
+            queryTotal(Calendar.DAY_OF_YEAR, end, id);
+            queryTotal(Calendar.WEEK_OF_YEAR, end, id);
+            queryTotal(Calendar.MONTH, end, id);
+        }
+    }
+    private void queryTotal(int field, long end, int actID) {
+        Calendar calStart = DateHelper.startOf(field, end);
+        long start = calStart.getTimeInMillis();
+        Uri u = ActivityDiaryContract.DiaryStats.CONTENT_URI;
+        u = Uri.withAppendedPath(u, Long.toString(start));
+        u = Uri.withAppendedPath(u, Long.toString(end));
+
+        mQHandler.startQuery(QUERY_CURRENT_ACTIVITY_TOTAL, new RecordActivity.StatParam(field, end),
+                u,
+                new String[]{
+                        ActivityDiaryContract.DiaryStats.DURATION
+                },
+                ActivityDiaryContract.DiaryActivity.TABLE_NAME + "." + ActivityDiaryContract.DiaryActivity._ID
+                        + " = ?",
+                new String[]{
+                        Integer.toString(actID)
+                },
+                null);
+    }
+    private class StatParam {
+        public int field;
+        public long end;
+
+        public StatParam(int field, long end) {
+            this.field = field;
+            this.end = end;
+        }
+    }
 
     public static DetailViewModel getViewModel(){return viewModel;}
 }
