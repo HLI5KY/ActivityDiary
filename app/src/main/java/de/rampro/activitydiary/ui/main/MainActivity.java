@@ -867,6 +867,7 @@ public class MainActivity extends BaseActivity implements
     }
     public static List<DiaryActivity> getRunActivities(){return runActivities;}
     public static void addRunActivities(DiaryActivity act){
+        if(runActivities.contains(act)){return;}
         Collections.reverse(runActivities);
         runActivities.add(act);
         Collections.reverse(runActivities);

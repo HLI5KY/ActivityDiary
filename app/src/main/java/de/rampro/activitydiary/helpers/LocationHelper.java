@@ -47,7 +47,6 @@ import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 import de.rampro.activitydiary.model.DiaryActivity;
 import de.rampro.activitydiary.ui.main.MainActivity;
-import de.rampro.activitydiary.ui.main.MultiAct;
 import de.rampro.activitydiary.ui.settings.SettingsActivity;
 
 public class LocationHelper extends AsyncQueryHandler implements LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
