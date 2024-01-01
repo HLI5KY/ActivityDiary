@@ -82,6 +82,7 @@ import de.rampro.activitydiary.BuildConfig;
 import de.rampro.activitydiary.R;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 import de.rampro.activitydiary.helpers.ActivityHelper;
+import de.rampro.activitydiary.helpers.ConditionInfo;
 import de.rampro.activitydiary.helpers.DateHelper;
 import de.rampro.activitydiary.helpers.GraphicsHelper;
 import de.rampro.activitydiary.helpers.TimeSpanFormatter;
@@ -283,10 +284,10 @@ public class MainActivity extends BaseActivity implements
             filterActivityView(query);
         }
         //mycode
-        //ConditionInfo.WIFI.changeReceiver(this,null);
+        ConditionInfo.WIFI.changeReceiver(MainActivity.this,null);
+        ConditionInfo.Bluetooth.changeReceiver(MainActivity.this,null);
+        ConditionInfo.GPS.changeReceiver(MainActivity.this, null);
         //mycode
-
-
 // TODO: this is crazy to call onActivityChagned here, as it reloads the statistics and refills the viewModel... Completely against the idea of the viewmodel :-(
         onActivityChanged(); /* do this at the very end to ensure that no Loader finishes its data loading before */
     }

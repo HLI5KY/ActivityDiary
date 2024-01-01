@@ -19,6 +19,12 @@
 
 package de.rampro.activitydiary.helpers;
 
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
+import de.rampro.activitydiary.helpers.ConditionQHelper;
+import de.rampro.activitydiary.helpers.ActivityHelper;
+
+
 import android.Manifest;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
@@ -31,6 +37,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -38,6 +45,7 @@ import androidx.preference.PreferenceManager;
 
 import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
+import de.rampro.activitydiary.model.DiaryActivity;
 import de.rampro.activitydiary.ui.settings.SettingsActivity;
 
 public class LocationHelper extends AsyncQueryHandler implements LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -131,6 +139,43 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
         }
         startInsert(0, null, ActivityDiaryContract.DiaryLocation.CONTENT_URI,
                 values);
+
+        Log.d("Latitude Changes to", String.valueOf(location.getLatitude()));  // 纬度
+        Log.d("Longitude Changes to", String.valueOf(location.getLongitude()));  // 经度
+
+        int latInt = (int)(location.getLatitude() * 10000) / RANGE;
+        int lonInt = (int)(location.getLongitude() * 10000) / RANGE / 2;
+        String info = latInt + "|" + lonInt;
+
+        ConditionQHelper qHelper = new ConditionQHelper(null);
+        int dest_id = qHelper.cHelper("QUERY", info, Condition_GPS);  // 查找到的目标id
+        boolean needchange = true;
+        DiaryActivity current = ActivityHelper.helper.getCurrentActivity();
+
+        if(current != null && dest_id >= 0){   // 已有活动且存在可激活的活动，先尝试关闭
+            int current_id = current.getId();
+            if(current_id == dest_id){  // 目标activity已经运行
+                needchange = false;
+            }
+            else {
+                ActivityHelper.helper.setCurrentActivity(null);  // MainActivity #423
+                Log.d("GPS_close_current", "id: " + current_id + " closed");
+            }
+        }
+
+        if(dest_id >= 0) {
+            if (needchange) {
+                DiaryActivity dest_act = qHelper.getActivity(dest_id);
+                ActivityHelper.helper.setCurrentActivity(dest_act);
+                Log.d("GPS_start", dest_act.getName() + " " + dest_act.getId());
+            }
+            else {
+                Log.d("GPS_Change", "Need no change");
+            }
+        }
+        else {
+            Log.d("GPS_bind_search", "dest_id = -1, no target");
+        }
 
     }
 
