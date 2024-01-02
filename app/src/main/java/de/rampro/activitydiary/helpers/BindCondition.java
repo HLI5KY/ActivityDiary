@@ -63,25 +63,27 @@ public class BindCondition{
     }
     public static String bindInfo="";
     public static Map<String,String> delInfo= null;
-    public static Map<String,String> checkExist(String name,String infos,String Type){
+    public static Map<String,String> checkExist(String name,String infos,String Type,boolean jmp){
         ConditionQHelper helper = new ConditionQHelper();
         int act_id = helper.getID(name);
         String bind_id;
         String Act_id = (new Integer(act_id)).toString();
         Map<String,String> map = new HashMap<>();
         Cursor cursor;
-        if(act_id >= 0){//该activity是否已绑定condition
-            cursor = mOpenHelper.getReadableDatabase().query("activity_connection",new String[]{"info","connection_type","_deleted","act_id"},"act_id =?",new String[]{Act_id},null,null,null);
-            if(cursor != null){
-                if(cursor.moveToFirst()){
-                    String info = cursor.getString(cursor.getColumnIndexOrThrow("info"));
-                    String type = cursor.getString(cursor.getColumnIndexOrThrow("connection_type"));
-                    String id = cursor.getString(cursor.getColumnIndexOrThrow("act_id"));
-                    map.put("info",info);map.put("type",type);map.put("id",id);map.put("exist",EXIST_CONDITION);
+        if(jmp){
+            if(act_id >= 0){//该activity是否已绑定condition
+                cursor = mOpenHelper.getReadableDatabase().query("activity_connection",new String[]{"info","connection_type","_deleted","act_id"},"act_id =?",new String[]{Act_id},null,null,null);
+                if(cursor != null){
+                    if(cursor.moveToFirst()){
+                        String info = cursor.getString(cursor.getColumnIndexOrThrow("info"));
+                        String type = cursor.getString(cursor.getColumnIndexOrThrow("connection_type"));
+                        String id = cursor.getString(cursor.getColumnIndexOrThrow("act_id"));
+                        map.put("info",info);map.put("type",type);map.put("id",id);map.put("exist",EXIST_CONDITION);map.put("name",name);
+                        cursor.close();
+                        return map;
+                    }
                     cursor.close();
-                    return map;
                 }
-                cursor.close();
             }
         }
         //该condition是否已被别的activity绑定
@@ -109,7 +111,7 @@ public class BindCondition{
         return map;
     }
     public static Map<String,String> checkExist(String name){
-        return checkExist(name,"","0");
+        return checkExist(name,"","0",true);
     }
     public static int Bind(int type,String name,Context context) throws InterruptedException {
         switch(type){
@@ -168,7 +170,7 @@ public class BindCondition{
         String bssid = ConditionInfo.WIFI.getBSSID(context);
         if(!bssid.equals("")){
             String info = ssid + "|" +bssid;
-            Map<String,String> exist = checkExist(name,info,""+Condition_WIFI);
+            Map<String,String> exist = checkExist(name,info,""+Condition_WIFI,true);
             PopupWindows pop = new PopupWindows(context);
             ConditionQHelper helper = new ConditionQHelper();
             if(exist.isEmpty()){
@@ -205,7 +207,7 @@ public class BindCondition{
         String info = "";
         if(!infos.isEmpty()) {
             info =infos.get(0);
-            Map<String,String> exist = checkExist(name,info,""+Condition_Bluetooth);
+            Map<String,String> exist = checkExist(name,info,""+Condition_Bluetooth,true);
             ConditionQHelper helper = new ConditionQHelper();
             if(exist.isEmpty()){
                 pop.confirmConnection(Condition_Bluetooth,info);
@@ -242,7 +244,7 @@ public class BindCondition{
             String info = latInt + "|" + lonInt;
             // Log.d("GPS info", info);
 
-            Map<String, String> exist = checkExist(name, info, ""+Condition_GPS);
+            Map<String, String> exist = checkExist(name, info, ""+Condition_GPS,true);
 
             if(exist.isEmpty()){
                 pop.confirmConnection(Condition_GPS, info);

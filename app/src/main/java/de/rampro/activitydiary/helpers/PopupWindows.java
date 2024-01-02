@@ -133,8 +133,19 @@ public class PopupWindows {
                 .setPositiveButton("覆盖", new DialogInterface.OnClickListener() {  // OK按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        BindCondition.delInfo = exist;
-                        BindCondition.bindInfo = info;
+                        Map<String,String> exist2 = BindCondition.checkExist(exist.get("name"),info,String.valueOf(type),false);
+                        if(exist2.isEmpty()){
+                            BindCondition.delInfo = exist;
+                            BindCondition.bindInfo = info;
+                        }
+                        else {
+                            PopupWindows pop = new PopupWindows(context);
+                            try {
+                                pop.confirmOwActivity(Integer.valueOf(exist.get("type")),exist2,info,exist.get("name"));
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {  // Cancel按钮
