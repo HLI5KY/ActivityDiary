@@ -283,6 +283,7 @@ public class ConditionInfo{
                     }
                     else{
                         Log.d("Location_Info", "定位不可用");
+                        Toast.makeText(context, "定位服务不可用", Toast.LENGTH_LONG).show();
                     }
                     break;
 
