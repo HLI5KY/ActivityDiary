@@ -871,9 +871,27 @@ public class MainActivity extends BaseActivity implements
         ActivityHelper.helper.setCurrentActivity(act);
         Collections.reverse(runActivities);
     }
-    public static void removeRunActivities(DiaryActivity act){
-        runActivities.remove(act);
+    public static void removeActivityWithId(int id){
+        for(int i=0;i<runActivities.size();i++){
+            if(runActivities.get(i).getId() == id){
+                runActivities.remove(runActivities.get(i));
+            }
+        }
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        else{ActivityHelper.helper.setCurrentActivity(null);}
     }
+    public static void removeActivityWithConnection(int type){
+        for(int i=0;i<runActivities.size();i++){
+            if(runActivities.get(i).getConnection() == type){
+                runActivities.remove(runActivities.get(i));
+            }
+        }
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        else{ActivityHelper.helper.setCurrentActivity(null);}
+    }
+//    public static void removeRunActivities(DiaryActivity act){
+//        runActivities.remove(act);
+//    }
     public void refreshList(){
         multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
         multiRecyclerView.setAdapter(multiAdapter);
