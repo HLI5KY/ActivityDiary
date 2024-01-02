@@ -62,7 +62,7 @@ public class BindCondition{
         public static int RANGE = 2;  // 纬度/2，经度/4，边长50m
     }
     public static String bindInfo="";
-    public static Map<String,String> delInfo= new HashMap<>();
+    public static Map<String,String> delInfo= null;
     public static Map<String,String> checkExist(String name,String infos,String Type){
         ConditionQHelper helper = new ConditionQHelper();
         int act_id = helper.getID(name);
@@ -149,14 +149,14 @@ public class BindCondition{
     public static void delBind(Context context){
         Map<String,String> exist = delInfo;
         ConditionQHelper helper= new ConditionQHelper();
-        if(!exist.isEmpty()){
+        if(exist!= null&&!exist.isEmpty()){
             if(bindInfo.equals("")){
                 Toast.makeText(context,"成功清除启动条件",Toast.LENGTH_LONG).show();
                 MainActivity.removeActivityWithId(Integer.valueOf(exist.get("id")));
                 MainActivity.refreshList();
             }
             helper.cHelper("DELETE",exist.get("info"),Integer.valueOf(exist.get("type")),Integer.valueOf(exist.get("id")));
-            delInfo.clear();
+            delInfo= null;
         }
     }
     /**
@@ -225,39 +225,43 @@ public class BindCondition{
     }
 
     private static int BindGPS(String name,Context context) throws InterruptedException {
-        ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
-        // ConditionQHelper helper = new ConditionQHelper(context);
-        // int act_id = helper.getID(name);
-        PopupWindows pop = new PopupWindows(context);
-
-        // 策略是保留四位小数，然后投影除以RANGE
-        int latInt = (int)(Double.parseDouble(infos.get(0)) * 10000) / RANGE;
-        int lonInt = (int)(Double.parseDouble(infos.get(1)) * 10000) / RANGE / 2;
-
-        String info = latInt + "|" + lonInt;
-        // Log.d("GPS info", info);
-
-        Map<String, String> exist = checkExist(name, info, ""+Condition_GPS);
-
-        if(exist.isEmpty()){
-            bindInfo = info;
-            Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
-        }
-        else if(exist.get("exist").equals(EXIST_CONDITION)){
-            pop.confirmOwConnection(Integer.parseInt(exist.get("type")), exist, info);
-            Log.d("EXIST_CONDITION","info: "+exist.get("info"));
-            Log.d("EXIST_CONDITION","id: "+exist.get("id"));
-            Log.d("EXIST_CONDITION","type: "+exist.get("type"));
-            /*弹窗*/
+        if(LocationHelper.helper.locationManager.isLocationEnabled()){
+            Toast.makeText(context, "请先开启定位服务", Toast.LENGTH_LONG).show();
+            return 0;
         }
         else{
-            pop.confirmOwActivity(Condition_GPS, exist, info, exist.get("name"));
-            Log.d("EXIST_ACTIVITY","info: "+exist.get("info"));
-            Log.d("EXIST_ACTIVITY","id: "+exist.get("id"));
-            Log.d("EXIST_ACTIVITY","type: "+exist.get("type"));
-            Log.d("EXIST_ACTIVITY","name: "+exist.get("name"));
-            /*弹窗*/
-        }
+            ArrayList<String> infos = ConditionInfo.GPS.getInfos(context);
+            // ConditionQHelper helper = new ConditionQHelper(context);
+            // int act_id = helper.getID(name);
+            PopupWindows pop = new PopupWindows(context);
+
+            // 策略是保留四位小数，然后投影除以RANGE
+            int latInt = (int)(Double.parseDouble(infos.get(0)) * 10000) / RANGE;
+            int lonInt = (int)(Double.parseDouble(infos.get(1)) * 10000) / RANGE / 2;
+
+            String info = latInt + "|" + lonInt;
+            // Log.d("GPS info", info);
+
+            Map<String, String> exist = checkExist(name, info, ""+Condition_GPS);
+
+            if(exist.isEmpty()){
+                pop.confirmConnection(Condition_GPS, info);
+            }
+            else if(exist.get("exist").equals(EXIST_CONDITION)){
+                pop.confirmOwConnection(Integer.parseInt(exist.get("type")), exist, info);
+                Log.d("EXIST_CONDITION","info: "+exist.get("info"));
+                Log.d("EXIST_CONDITION","id: "+exist.get("id"));
+                Log.d("EXIST_CONDITION","type: "+exist.get("type"));
+                /*弹窗*/
+            }
+            else{
+                 pop.confirmOwActivity(Condition_GPS, exist, info, exist.get("name"));
+                Log.d("EXIST_ACTIVITY","info: "+exist.get("info"));
+                Log.d("EXIST_ACTIVITY","id: "+exist.get("id"));
+                Log.d("EXIST_ACTIVITY","type: "+exist.get("type"));
+                Log.d("EXIST_ACTIVITY","name: "+exist.get("name"));
+                /*弹窗*/
+             }
 
         // Log.d("Latitude", infos.get(0));  // 纬度
         // Log.d("Longitude", infos.get(1));  // 经度
@@ -270,7 +274,8 @@ public class BindCondition{
         //     Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();
         // }
 
-        return 1;
+            return 1;
+        }
 
     }
 

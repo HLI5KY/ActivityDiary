@@ -122,8 +122,8 @@ public class PopupWindows {
                 break;
             case Condition_GPS:
                 infoShow = "类型: " + "GPS" + "\n" +
-                        "经度: " + detailInfo[0] + "\n" +
-                        "纬度: " + detailInfo[1];
+                        "经度: " + recNum(1, detailInfo[1])+"\n"+
+                        "纬度: " + recNum(0, detailInfo[0]);
                 break;
         }
         alertDialog = new AlertDialog.Builder(context)
@@ -194,6 +194,9 @@ public class PopupWindows {
         alertDialog.show();
 
     }
+    /**
+     * 从 info 中的投影恢复出经纬度
+     */
     private String recNum(int type, String str){
         Double num = Double.parseDouble(str) / 10000 * RANGE;
         if(type == 1){  // 经度
