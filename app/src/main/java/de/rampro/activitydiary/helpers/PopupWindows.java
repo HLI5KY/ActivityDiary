@@ -22,6 +22,7 @@ package de.rampro.activitydiary.helpers;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_Bluetooth;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -79,8 +80,8 @@ public class PopupWindows {
                 break;
             case Condition_GPS:
                 infoShow = "类型: "+"GPS"+"\n"+
-                        "经度: " + detailInfo[0]+"\n"+
-                        "纬度: " + detailInfo[1];
+                        "经度: " + recNum(1, detailInfo[1])+"\n"+
+                        "纬度: " + recNum(0, detailInfo[0]);
                 break;
         }
         alertDialog = new AlertDialog.Builder(context)
@@ -124,8 +125,8 @@ public class PopupWindows {
             case Condition_GPS:
                 infoShow = "活动： " + name+"\n"+
                         "类型: "+"GPS"+"\n"+
-                        "经度: " + detailInfo[0]+"\n"+
-                        "纬度: " + detailInfo[1];
+                        "经度: " + recNum(1, detailInfo[1])+"\n"+
+                        "纬度: " + recNum(0, detailInfo[0]);
                 break;
         }
         alertDialog = new AlertDialog.Builder(context)
@@ -219,6 +220,17 @@ public class PopupWindows {
      */
     void Handle2(String res){
         Log.d("Handle2", res);
+    }
+
+    /**
+     * 从 info 中的投影恢复出经纬度
+     */
+    private String recNum(int type, String str){
+        Double num = Double.parseDouble(str) / 10000 * RANGE;
+        if(type == 1){  // 经度
+            return String.valueOf(num * 2);
+        }
+        return String.valueOf(num);  // 纬度
     }
 
 }
