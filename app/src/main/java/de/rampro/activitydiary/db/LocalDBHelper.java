@@ -31,7 +31,7 @@ public class LocalDBHelper extends SQLiteOpenHelper {
 
     public LocalDBHelper(Context context) {
         super(context, ActivityDiaryContract.AUTHORITY, null, CURRENT_VERSION);
-        onUpgrade(this.getWritableDatabase(),1,7);
+//        onUpgrade(this.getWritableDatabase(),1,7);
     }
 
     @Override
