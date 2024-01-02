@@ -62,7 +62,7 @@ public class BindCondition{
         public static int RANGE = 2;  // 纬度/2，经度/4，边长50m
     }
     public static String bindInfo="";
-    public static Map<String,String> delInfo= new HashMap<>();
+    public static Map<String,String> delInfo= null;
     public static Map<String,String> checkExist(String name,String infos,String Type){
         ConditionQHelper helper = new ConditionQHelper();
         int act_id = helper.getID(name);
@@ -149,14 +149,14 @@ public class BindCondition{
     public static void delBind(Context context){
         Map<String,String> exist = delInfo;
         ConditionQHelper helper= new ConditionQHelper();
-        if(!exist.isEmpty()){
+        if(exist!= null&&!exist.isEmpty()){
             if(bindInfo.equals("")){
                 Toast.makeText(context,"成功清除启动条件",Toast.LENGTH_LONG).show();
                 MainActivity.removeActivityWithId(Integer.valueOf(exist.get("id")));
                 MainActivity.refreshList();
             }
             helper.cHelper("DELETE",exist.get("info"),Integer.valueOf(exist.get("type")),Integer.valueOf(exist.get("id")));
-            delInfo.clear();
+            delInfo= null;
         }
     }
     /**
