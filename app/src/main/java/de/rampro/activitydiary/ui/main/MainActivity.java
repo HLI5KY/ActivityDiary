@@ -137,6 +137,7 @@ public class MainActivity extends BaseActivity implements
 
     public static Handler handler = new Handler();
     public static Runnable runnable;
+    public static Context mainContext = null;
 
     private void setSearchMode(boolean searchMode){
         if(searchMode){
@@ -170,6 +171,7 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainContext = MainActivity.this;
 
         viewModel = ViewModelProviders.of(this).get(DetailViewModel.class);
 
@@ -297,7 +299,7 @@ public class MainActivity extends BaseActivity implements
 
         // 自动刷新多任务列表
 
-        int interval = 10000;
+        int interval = 10000000;
         runnable = new Runnable(){
             @Override
             public void run(){
@@ -410,7 +412,6 @@ public class MainActivity extends BaseActivity implements
     public void onItemClick(int adapterPosition) {
 //        runActivities = getRunActivities();
         DiaryActivity newAct = selectAdapter.item(adapterPosition);
-//        Collections.reverse(runActivities);
 //        if(newAct != ActivityHelper.helper.getCurrentActivity()) {
         if(!runActivities.contains(newAct)) {
 
@@ -466,7 +467,6 @@ public class MainActivity extends BaseActivity implements
 //            Log.d("Main", "view_size="+runActivities.size());
         }
 
-//        Collections.reverse(runActivities);
         refreshList();
 
         for (int i = 0; i < viewModels.size(); i++) {
@@ -870,13 +870,34 @@ public class MainActivity extends BaseActivity implements
         if(runActivities.contains(act)){return;}
         Collections.reverse(runActivities);
         runActivities.add(act);
+        ActivityHelper.helper.setCurrentActivity(act);
         Collections.reverse(runActivities);
     }
-    public static void removeRunActivities(DiaryActivity act){
-        runActivities.remove(act);
+    public static void removeActivityWithId(int id){
+        for(int i=0;i<runActivities.size();i++){
+            if(runActivities.get(i).getId() == id){
+                runActivities.remove(runActivities.get(i));
+            }
+        }
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        else{ActivityHelper.helper.setCurrentActivity(null);}
     }
-    public void refreshList(){
-        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
-        multiRecyclerView.setAdapter(multiAdapter);
+    public static void removeActivityWithConnection(int type){
+        for(int i=0;i<runActivities.size();i++){
+            if(runActivities.get(i).getConnection() == type){
+                runActivities.remove(runActivities.get(i));
+            }
+        }
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        else{ActivityHelper.helper.setCurrentActivity(null);}
+    }
+//    public static void removeRunActivities(DiaryActivity act){
+//        runActivities.remove(act);
+//    }
+    public static void refreshList(){
+        if(mainContext!=null){
+            multiAdapter = new MultiRecyclerViewAdapter((MultiRecyclerViewAdapter.MultiListener) mainContext,runActivities);
+            multiRecyclerView.setAdapter(multiAdapter);
+        }
     }
 }

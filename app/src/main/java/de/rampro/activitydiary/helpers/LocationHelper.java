@@ -170,6 +170,7 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
                 ActivityHelper.helper.setCurrentActivity(dest_act);
                 // 加入MainActivity的多任务列表
                 MainActivity.addRunActivities(dest_act);
+                MainActivity.refreshList();
                 Log.d("GPS_start", dest_act.getName() + " " + dest_act.getId());
             }
             else {
