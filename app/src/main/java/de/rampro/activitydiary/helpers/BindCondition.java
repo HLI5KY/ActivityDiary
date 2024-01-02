@@ -122,6 +122,7 @@ public class BindCondition{
         int act_id = helper.getID(name);
         if(!info.equals("")){
             helper.cHelper("INSERT",info,type,act_id);
+            bindInfo = "";
         }
         Log.d("finishBind","info: "+info);
         Log.d("finishBind","type: "+type);
