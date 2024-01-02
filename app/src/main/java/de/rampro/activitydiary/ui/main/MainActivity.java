@@ -299,7 +299,7 @@ public class MainActivity extends BaseActivity implements
 
         // 自动刷新多任务列表
 
-        int interval = 10000000;
+        int interval = 100000;
         runnable = new Runnable(){
             @Override
             public void run(){
@@ -398,7 +398,11 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
-    public void onTagClick(int adapterPosition){}
+    public void onTagClick(int adapterPosition){
+        DiaryActivity act = multiAdapter.item(adapterPosition);
+        removeRunActivities(act);
+        refreshList();
+    }
 
     @Override
     public boolean onItemLongClick(int adapterPosition){
@@ -410,19 +414,17 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onItemClick(int adapterPosition) {
-//        runActivities = getRunActivities();
         DiaryActivity newAct = selectAdapter.item(adapterPosition);
-//        if(newAct != ActivityHelper.helper.getCurrentActivity()) {
         if(!runActivities.contains(newAct)) {
 
             addRunActivities(newAct);
 //            Log.d("Main","add "+newAct.getName());
             ActivityHelper.helper.setCurrentActivity(newAct);
             onActivityChanged();
-            addViewModels(viewModel);
-//            Log.d("Main","add viewModel "+viewModel.currentActivity().getValue().getName());
-//            Log.d("Main", "act_size="+runActivities.size());
-//            Log.d("Main", "view_size="+runActivities.size());
+//            addViewModels(viewModel, newAct);
+
+            Log.d("Main", "act_size="+runActivities.size());
+            Log.d("Main", "view_size="+runActivities.size());
 
             searchView.setQuery("", false);
             searchView.setIconified(true);
@@ -451,32 +453,35 @@ public class MainActivity extends BaseActivity implements
         }else{
             /* clicked the currently active activity in the list, so let's terminate it due to #176 */
 
-            runActivities.remove(newAct);
-//            Log.d("Main","remove "+newAct.getName());
-            if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
-            else{ActivityHelper.helper.setCurrentActivity(null);}
+            removeRunActivities(newAct);
+//            runActivities.remove(newAct);
+//            if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+//            else{ActivityHelper.helper.setCurrentActivity(null);}
+//            for(int i=0;i<viewModels.size();i++){
+//                DiaryActivity act = viewModels.get(i).currentActivity().getValue();
+//                if(act!=null && act.getId()==newAct.getId()){
+//                    viewModels.remove(viewModels.get(i));
+//                }
+//            }
 
-            for(int i=0;i<viewModels.size();i++){
-                DiaryActivity act = viewModels.get(i).currentActivity().getValue();
-                if(act!=null && act.getId()==newAct.getId()){
-//                    Log.d("Main","remove viewModel "+newAct.getName());
-                    viewModels.remove(viewModels.get(i));
-                }
-            }
-//            Log.d("Main", "act_size="+runActivities.size());
-//            Log.d("Main", "view_size="+runActivities.size());
+
+
+            Log.d("Main", "act_size="+runActivities.size());
+            Log.d("Main", "view_size="+runActivities.size());
         }
 
         refreshList();
 
-        for (int i = 0; i < viewModels.size(); i++) {
-            if (viewModels.get(i).mCurrentActivity.getValue() != null) {
-                Log.d("Main", "" + viewModels.get(i).currentActivity().getValue().getName());
-            }
-        }
+//        for (int i = 0; i < viewModels.size(); i++) {
+//            if (viewModels.get(i).mCurrentActivity.getValue() != null) {
+//                Log.d("Main", "" + viewModels.get(i).currentActivity().getValue().getName());
+//            }
+//        }
     }
 
     public void onActivityChanged(){
+        Log.d("Main","onActivityChanged");
+
         DiaryActivity oldAct = null;
         if(viewModel.currentActivity().getValue() != null){oldAct = viewModel.currentActivity().getValue();}
 //        if(oldAct!=null)Log.d("Main","oldAct="+oldAct.getName());
@@ -532,6 +537,9 @@ public class MainActivity extends BaseActivity implements
             viewModel.mNote.setValue("");
         }
         selectorLayoutManager.scrollToPosition(0);
+        if (viewModel.currentActivity().getValue() != null && newAct != null) {
+            addViewModels(viewModel, newAct);
+        }
 
     }
 
@@ -849,11 +857,12 @@ public class MainActivity extends BaseActivity implements
 
     public DetailViewModel getViewModel(){return this.viewModel;}
     public static List<DetailViewModel> getViewModels(){return viewModels;}
-    public static void addViewModels(DetailViewModel v){
+    public static void addViewModels(DetailViewModel v, DiaryActivity act){
         DetailViewModel temp = new DetailViewModel();
+        temp.mCurrentActivity.setValue((DiaryActivity) act.clone());
         if(v.currentActivity().getValue() != null){
             //不能直接传整个对象(因为是浅拷贝), DetailViewModel的Clone方法实现起来有丶麻烦, 只好一个个传数据...
-            temp.mCurrentActivity.setValue((DiaryActivity) v.currentActivity().getValue().clone());
+//            temp.mCurrentActivity.setValue((DiaryActivity) v.currentActivity().getValue().clone());
             temp.mNote.setValue(v.mNote.getValue());
             temp.mDuration.setValue(v.mDuration.getValue());
             temp.mAvgDuration.setValue(v.mAvgDuration.getValue());
@@ -869,9 +878,27 @@ public class MainActivity extends BaseActivity implements
     public static void addRunActivities(DiaryActivity act){
         if(runActivities.contains(act)){return;}
         Collections.reverse(runActivities);
+
         runActivities.add(act);
         ActivityHelper.helper.setCurrentActivity(act);
+//        addViewModels(viewModel, act);
+
         Collections.reverse(runActivities);
+    }
+    public static void removeRunActivities(DiaryActivity act){
+        if(!runActivities.contains(act)){return;}
+        runActivities.remove(act);
+//            Log.d("Main","remove "+newAct.getName());
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(0));
+        else{ActivityHelper.helper.setCurrentActivity(null);}
+
+        for(int i=0;i<viewModels.size();i++){
+            DiaryActivity v = viewModels.get(i).currentActivity().getValue();
+            if(v!=null && v.getId() == act.getId()){
+//                    Log.d("Main","remove viewModel "+newAct.getName());
+                viewModels.remove(viewModels.get(i));
+            }
+        }
     }
     public static void removeActivityWithId(int id){
         for(int i=0;i<runActivities.size();i++){
@@ -879,8 +906,15 @@ public class MainActivity extends BaseActivity implements
                 runActivities.remove(runActivities.get(i));
             }
         }
-        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(0));
         else{ActivityHelper.helper.setCurrentActivity(null);}
+
+        for(int i=0;i<viewModels.size();i++){
+            DiaryActivity v = viewModels.get(i).currentActivity().getValue();
+            if(v!=null && v.getId() == id){
+                viewModels.remove(viewModels.get(i));
+            }
+        }
     }
     public static void removeActivityWithRunning(int id){
         for(int i=0;i<runActivities.size();i++){
@@ -888,8 +922,15 @@ public class MainActivity extends BaseActivity implements
                 runActivities.remove(runActivities.get(i));
             }
         }
-        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(0));
         else{ActivityHelper.helper.setCurrentActivity(null);}
+
+        for(int i=0;i<viewModels.size();i++){
+            DiaryActivity v = viewModels.get(i).currentActivity().getValue();
+            if(v!=null && v.getId() == id){
+                viewModels.remove(viewModels.get(i));
+            }
+        }
     }
     public static void removeActivityWithConnection(int type){
         for(int i=0;i<runActivities.size();i++){
@@ -897,12 +938,17 @@ public class MainActivity extends BaseActivity implements
                 runActivities.remove(runActivities.get(i));
             }
         }
-        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(0));
         else{ActivityHelper.helper.setCurrentActivity(null);}
+
+        for(int i=0;i<viewModels.size();i++){
+            DiaryActivity v = viewModels.get(i).currentActivity().getValue();
+            if(v!=null && v.getConnection() == type){
+                viewModels.remove(viewModels.get(i));
+            }
+        }
     }
-//    public static void removeRunActivities(DiaryActivity act){
-//        runActivities.remove(act);
-//    }
+
     public static void refreshList(){
         if(mainContext!=null){
             multiAdapter = new MultiRecyclerViewAdapter((MultiRecyclerViewAdapter.MultiListener) mainContext,runActivities);
