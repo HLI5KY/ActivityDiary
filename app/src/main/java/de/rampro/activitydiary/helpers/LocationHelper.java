@@ -20,6 +20,7 @@
 package de.rampro.activitydiary.helpers;
 
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_GPS;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.Condition_WIFI;
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.RANGE;
 import de.rampro.activitydiary.helpers.ConditionQHelper;
 import de.rampro.activitydiary.helpers.ActivityHelper;
@@ -148,39 +149,17 @@ public class LocationHelper extends AsyncQueryHandler implements LocationListene
         int lonInt = (int)(location.getLongitude() * 10000) / RANGE / 2;
         String info = latInt + "|" + lonInt;
 
-        ConditionQHelper qHelper = new ConditionQHelper(null);
-        int dest_id = qHelper.cHelper("QUERY", info, Condition_GPS);  // 查找到的目标id
-        boolean needchange = true;
-        DiaryActivity current = ActivityHelper.helper.getCurrentActivity();
-
-        if(current != null && dest_id >= 0){   // 已有活动且存在可激活的活动，先尝试关闭
-            int current_id = current.getId();
-            if(current_id == dest_id){  // 目标activity已经运行
-                needchange = false;
-            }
-            else {
-                ActivityHelper.helper.setCurrentActivity(null);  // MainActivity #423
-                Log.d("GPS_close_current", "id: " + current_id + " closed");
-            }
-        }
-
-        if(dest_id >= 0) {
-            if (needchange) {
-                DiaryActivity dest_act = qHelper.getActivity(dest_id);
-                ActivityHelper.helper.setCurrentActivity(dest_act);
-                // 加入MainActivity的多任务列表
-                MainActivity.addRunActivities(dest_act);
-                MainActivity.refreshList();
-                Log.d("GPS_start", dest_act.getName() + " " + dest_act.getId());
-            }
-            else {
-                Log.d("GPS_Change", "Need no change");
-            }
-        }
-        else {
-            Log.d("GPS_bind_search", "dest_id = -1, no target");
-        }
-
+        ConditionQHelper helper1 = new ConditionQHelper();
+        MainActivity.removeActivityWithConnection(Condition_GPS);
+        MainActivity.refreshList();
+        /*关闭activity*/
+        int start_id = helper1.cHelper("QUERY",info,Condition_GPS);
+        if(start_id >= 0) {
+            DiaryActivity newAct = helper1.getActivity(start_id);
+            newAct.setRunning(true);
+            MainActivity.addRunActivities(newAct);
+            MainActivity.refreshList();
+         }
     }
 
     /**
