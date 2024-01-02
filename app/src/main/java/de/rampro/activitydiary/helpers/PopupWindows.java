@@ -53,7 +53,7 @@ public class PopupWindows {
     private Context context;  // 填充用
     private AlertDialog alertDialog;  // 弹窗本体
 
-    PopupWindows(Context _context) {
+    public PopupWindows(Context _context) {
         context = _context;
     }
 

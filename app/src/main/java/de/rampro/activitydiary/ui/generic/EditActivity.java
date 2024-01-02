@@ -65,9 +65,11 @@ import de.rampro.activitydiary.R;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 import de.rampro.activitydiary.helpers.ActivityHelper;
 import de.rampro.activitydiary.helpers.ConditionInfo;
+import de.rampro.activitydiary.helpers.ConditionQHelper;
 import de.rampro.activitydiary.helpers.JaroWinkler;
 import de.rampro.activitydiary.helpers.GraphicsHelper;
 import de.rampro.activitydiary.helpers.BindCondition;
+import de.rampro.activitydiary.helpers.PopupWindows;
 import de.rampro.activitydiary.model.DiaryActivity;
 
 /*
@@ -417,6 +419,24 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         });
 
         Button conditionConfirm = (Button) findViewById(R.id.edit_activity_confirm_condition);
+        Button conditionClear = (Button) findViewById(R.id.edit_activity_clear_condition);
+        conditionClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Map<String,String> exist = BindCondition.checkExist(mActivityName.getText().toString());
+                if(exist.isEmpty()){
+                    Toast.makeText(EditActivity.this,"该活动未绑定启动条件",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    PopupWindows pop = new PopupWindows(EditActivity.this);
+                    try {
+                        pop.confirmOwConnection(Integer.valueOf(exist.get("type")) ,exist,"");
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
         conditionConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -577,7 +597,7 @@ git
                         finish();
                     }
                 }
-                BindCondition.delBind();
+                BindCondition.delBind(EditActivity.this);
                 BindCondition.finishBind(Condition_Type,name,EditActivity.this);
                 break;
             case android.R.id.home:

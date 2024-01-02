@@ -882,6 +882,15 @@ public class MainActivity extends BaseActivity implements
         if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
         else{ActivityHelper.helper.setCurrentActivity(null);}
     }
+    public static void removeActivityWithRunning(int id){
+        for(int i=0;i<runActivities.size();i++){
+            if(runActivities.get(i).getId() == id &&runActivities.get(i).getRunning()){
+                runActivities.remove(runActivities.get(i));
+            }
+        }
+        if(runActivities.size()>0)ActivityHelper.helper.setCurrentActivity(runActivities.get(runActivities.size()-1));
+        else{ActivityHelper.helper.setCurrentActivity(null);}
+    }
     public static void removeActivityWithConnection(int type){
         for(int i=0;i<runActivities.size();i++){
             if(runActivities.get(i).getConnection() == type && runActivities.get(i).getRunning()){

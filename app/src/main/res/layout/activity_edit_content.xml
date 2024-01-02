@@ -121,4 +121,10 @@
         android:text="Begin to bind"
         android:id="@+id/edit_activity_confirm_condition"
         />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clear Condition"
+        android:id="@+id/edit_activity_clear_condition"
+        />
 </LinearLayout>

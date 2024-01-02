@@ -108,6 +108,9 @@ public class BindCondition{
 
         return map;
     }
+    public static Map<String,String> checkExist(String name){
+        return checkExist(name,"","0");
+    }
     public static int Bind(int type,String name,Context context) throws InterruptedException {
         switch(type){
             case Condition_WIFI:
@@ -143,10 +146,15 @@ public class BindCondition{
         Log.d("finishBind","type: "+type);
         Log.d("finishBind","act_id: "+act_id);
     }
-    public static void delBind(){
+    public static void delBind(Context context){
         Map<String,String> exist = delInfo;
         ConditionQHelper helper= new ConditionQHelper();
         if(!exist.isEmpty()){
+            if(bindInfo.equals("")){
+                Toast.makeText(context,"成功清除启动条件",Toast.LENGTH_LONG).show();
+                MainActivity.removeActivityWithId(Integer.valueOf(exist.get("id")));
+                MainActivity.refreshList();
+            }
             helper.cHelper("DELETE",exist.get("info"),Integer.valueOf(exist.get("type")),Integer.valueOf(exist.get("id")));
             delInfo.clear();
         }
