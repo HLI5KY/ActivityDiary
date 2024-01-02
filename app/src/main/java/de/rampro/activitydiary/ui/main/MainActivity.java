@@ -137,6 +137,7 @@ public class MainActivity extends BaseActivity implements
 
     public static Handler handler = new Handler();
     public static Runnable runnable;
+    public static Context mainContext = null;
 
     private void setSearchMode(boolean searchMode){
         if(searchMode){
@@ -170,6 +171,7 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainContext = MainActivity.this;
 
         viewModel = ViewModelProviders.of(this).get(DetailViewModel.class);
 
@@ -297,7 +299,7 @@ public class MainActivity extends BaseActivity implements
 
         // 自动刷新多任务列表
 
-        int interval = 10000;
+        int interval = 10000000;
         runnable = new Runnable(){
             @Override
             public void run(){
@@ -892,8 +894,10 @@ public class MainActivity extends BaseActivity implements
 //    public static void removeRunActivities(DiaryActivity act){
 //        runActivities.remove(act);
 //    }
-    public void refreshList(){
-        multiAdapter = new MultiRecyclerViewAdapter(MainActivity.this,runActivities);
-        multiRecyclerView.setAdapter(multiAdapter);
+    public static void refreshList(){
+        if(mainContext!=null){
+            multiAdapter = new MultiRecyclerViewAdapter((MultiRecyclerViewAdapter.MultiListener) mainContext,runActivities);
+            multiRecyclerView.setAdapter(multiAdapter);
+        }
     }
 }
