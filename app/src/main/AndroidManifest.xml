@@ -49,7 +49,8 @@
         android:required="false"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:required="false"/>
-
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"
+        android:required="false"/>
     <!-- for background location service -->
     <!-- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:required="false" /> -->

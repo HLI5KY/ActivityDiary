@@ -38,9 +38,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.rampro.activitydiary.db.LocalDBHelper;
+import de.rampro.activitydiary.model.DiaryActivity;
 import de.rampro.activitydiary.model.conditions.Condition;
 import de.rampro.activitydiary.ui.generic.EditActivity;
 import de.rampro.activitydiary.helpers.ConditionInfo;
+import de.rampro.activitydiary.ui.main.MainActivity;
+
 /**
  * 进行condition的绑定*/
 public class BindCondition{
@@ -122,6 +125,18 @@ public class BindCondition{
         int act_id = helper.getID(name);
         if(!info.equals("")){
             helper.cHelper("INSERT",info,type,act_id);
+            DiaryActivity newAct =  helper.getActivity(act_id);
+            newAct.setRunning(true);
+            MainActivity.addRunActivities(newAct);
+            MainActivity.refreshList();
+            switch (type){
+                case Condition_WIFI:
+                    Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();break;
+                case Condition_Bluetooth:
+                    Toast.makeText(context, "成功绑定蓝牙", Toast.LENGTH_LONG).show();break;
+                case Condition_GPS:
+                    Toast.makeText(context, "成功绑定GPS", Toast.LENGTH_LONG).show();break;
+            }
             bindInfo = "";
         }
         Log.d("finishBind","info: "+info);
@@ -143,53 +158,62 @@ public class BindCondition{
     private static int BindWIFI(String name,Context context) throws InterruptedException {
         String ssid = ConditionInfo.WIFI.getSSID(context);
         String bssid = ConditionInfo.WIFI.getBSSID(context);
-        String info = ssid + "|" +bssid;
-        Map<String,String> exist = checkExist(name,info,""+Condition_WIFI);
-        PopupWindows pop = new PopupWindows(context);
-        ConditionQHelper helper = new ConditionQHelper();
-        if(exist.isEmpty()){
-            bindInfo = info;
-            Toast.makeText(context, "成功绑定WIFI", Toast.LENGTH_LONG).show();
+        if(!bssid.equals("")){
+            String info = ssid + "|" +bssid;
+            Map<String,String> exist = checkExist(name,info,""+Condition_WIFI);
+            PopupWindows pop = new PopupWindows(context);
+            ConditionQHelper helper = new ConditionQHelper();
+            if(exist.isEmpty()){
+                pop.confirmConnection(Condition_WIFI,info);
+            }
+            else if(exist.get("exist").equals(EXIST_CONDITION)){
+                pop.confirmOwConnection(Integer.valueOf(exist.get("type")) ,exist,info);
+                Log.d("EXIST_CONDITION","info: "+exist.get("info"));
+                Log.d("EXIST_CONDITION","id: "+exist.get("id"));
+                Log.d("EXIST_CONDITION","type: "+exist.get("type"));
+            }
+            else{
+                pop.confirmOwActivity(Integer.valueOf(exist.get("type")),exist,info,exist.get("name"));
+                Log.d("EXIST_ACTIVITY","info: "+exist.get("info"));
+                Log.d("EXIST_ACTIVITY","id: "+exist.get("id"));
+                Log.d("EXIST_ACTIVITY","type: "+exist.get("type"));
+                Log.d("EXIST_ACTIVITY","name: "+exist.get("name"));
+            }
+            return 1;
         }
-        else if(exist.get("exist").equals(EXIST_CONDITION)){
-            pop.confirmOwConnection(Integer.parseInt(exist.get("type")),exist,info);
-            Log.d("EXIST_CONDITION","info: "+exist.get("info"));
-            Log.d("EXIST_CONDITION","id: "+exist.get("id"));
-            Log.d("EXIST_CONDITION","type: "+exist.get("type"));
-            /*弹窗*/
+        else {
+            Toast.makeText(context,"请先连接WIFI",Toast.LENGTH_LONG).show();
         }
-        else{
-            pop.confirmOwActivity(Condition_WIFI,exist,info,exist.get("name"));
-            Log.d("EXIST_ACTIVITY","info: "+exist.get("info"));
-            Log.d("EXIST_ACTIVITY","id: "+exist.get("id"));
-            Log.d("EXIST_ACTIVITY","type: "+exist.get("type"));
-            Log.d("EXIST_ACTIVITY","name: "+exist.get("name"));
-            /*弹窗*/
-        }
-//        /*test*/
-//        String res;
-//        helper.cHelper("INSERT",info,Condition_WIFI);
-//        res = helper.cHelper("QUERY",info,Condition_WIFI);
-//        Log.d("QUERY","info1: "+res);
-//        helper.cHelper("UPDATE","test",Condition_WIFI);
-//        res = helper.cHelper("QUERY","test",Condition_WIFI);
-//        Log.d("QUERY","info2: "+res);
-//        helper.cHelper("DELETE","test",Condition_WIFI);
-//        res = helper.cHelper("QUERY","test",Condition_WIFI);
-//        Log.d("QUERY","info3: "+res);
-//        /*test*/
-        return 1;
+        return 0;
     }
 
-    private static int BindBluetooth(String name,Context context){
+    private static int BindBluetooth(String name,Context context) throws InterruptedException {
         ArrayList<String> Binfos = ConditionInfo.Bluetooth.getInfos(context);
         ArrayList<String> infos = new ArrayList<String>();
         for(int i=0;i<Binfos.size();i=i+2){
             infos.add(Binfos.get(i)+"|"+Binfos.get(i+1));
         }
-        String info =infos.get(0);
-        Toast.makeText(context, "test 2", Toast.LENGTH_LONG).show();
-        return 1;
+        PopupWindows pop = new PopupWindows(context);
+        String info = "";
+        if(!infos.isEmpty()) {
+            info =infos.get(0);
+            Map<String,String> exist = checkExist(name,info,""+Condition_Bluetooth);
+            ConditionQHelper helper = new ConditionQHelper();
+            if(exist.isEmpty()){
+                pop.confirmConnection(Condition_Bluetooth,info);
+            }
+            else if(exist.get("exist").equals(EXIST_CONDITION)){
+                pop.confirmOwConnection(Integer.valueOf(exist.get("type")) ,exist,info);
+            }
+            else{
+                pop.confirmOwActivity(Integer.valueOf(exist.get("type")),exist,info,exist.get("name"));
+            }
+            return 1;
+        }
+        else {
+            Toast.makeText(context,"请连接蓝牙设备",Toast.LENGTH_LONG).show();
+        }
+        return 0;
     }
 
     private static int BindGPS(String name,Context context) throws InterruptedException {

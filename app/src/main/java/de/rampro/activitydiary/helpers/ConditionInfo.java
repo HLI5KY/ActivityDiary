@@ -54,6 +54,7 @@ import de.rampro.activitydiary.ActivityDiaryApplication;
 import de.rampro.activitydiary.db.ActivityDiaryContract;
 import de.rampro.activitydiary.helpers.BindCondition.Reference;
 import de.rampro.activitydiary.model.DiaryActivity;
+import de.rampro.activitydiary.ui.main.MainActivity;
 
 /**
  * 管理condition的改变*/
@@ -89,11 +90,9 @@ public class ConditionInfo{
                                 break;
                             case WifiManager.WIFI_STATE_DISABLED:
                                 Reference.CurrentWIFI = "";
-                                int close_id = helper.getCloseID(Condition_WIFI);
-                                Log.d("WIFI_PARA","close_id: "+close_id);
-                                if(close_id >= 0) {
-                                    ActivityHelper.helper.setCurrentActivity(null);
-                                    /*关闭activity*/}
+                                MainActivity.removeActivityWithConnection(Condition_WIFI);
+                                MainActivity.refreshList();
+                                    /*关闭activity*/
                                 Log.d("WIFI_info","WIFI已关闭");
                                 break;
                         }
@@ -103,14 +102,9 @@ public class ConditionInfo{
                         if(!Reference.CurrentWIFI.equals(bssid) && !bssid.equals("") && !bssid.equals("00:00:00:00:00:00")){
                             Reference.CurrentWIFI = bssid;
                             String info = getSSID(context) + "|" + getBSSID(context);
-                            DiaryActivity current = ActivityHelper.helper.getCurrentActivity();
-                            if(current != null){
-                                int close_id = current.getId();
-                                Log.d("WIFI_PARA","close_id: "+close_id);
-                                if(close_id >= 0) {
-                                    ActivityHelper.helper.setCurrentActivity(null);
-                                    /*关闭activity*/}
-                            }
+                            MainActivity.removeActivityWithConnection(Condition_WIFI);
+                            MainActivity.refreshList();
+                                /*关闭activity*/
                             int start_id = helper.cHelper("QUERY",info,Condition_WIFI);
                             if(start_id >= 0) {
                                 DiaryActivity newAct = helper.getActivity(start_id);
@@ -121,7 +115,9 @@ public class ConditionInfo{
                                 Log.d("WIFI_PARA","color: "+newAct.getColor());
                                 Log.d("WIFI_PARA","_id: "+newAct.getId());
                                 Log.d("WIFI_PARA","type: "+newAct.getConnection());
-                                ActivityHelper.helper.setCurrentActivity(newAct);
+                                newAct.setRunning(true);
+                                MainActivity.addRunActivities(newAct);
+                                MainActivity.refreshList();
                             }
 
                             Log.d("WIFI_info","WIFI已修改"+Reference.CurrentWIFI);
@@ -181,31 +177,31 @@ public class ConditionInfo{
                             case BluetoothAdapter.STATE_CONNECTED:
                                 Log.d("Bluetooth_info","蓝牙已连接");
                                 ArrayList<String> Binfos = ConditionInfo.Bluetooth.getInfos(context);
-                                ArrayList<String> infos = new ArrayList<String>();
-                                for(int i=0;i<Binfos.size();i=i+2){
-                                    infos.add(Binfos.get(i)+"|"+Binfos.get(i+1));
+                                String info = "";
+                                if(!Binfos.isEmpty()) info = Binfos.get(0)+"|"+Binfos.get(1);
+                                MainActivity.removeActivityWithConnection(Condition_Bluetooth);
+                                MainActivity.refreshList();
+                                    /*关闭activity*/
+                                int start_id = helper.cHelper("QUERY",info,Condition_Bluetooth);
+                                if(start_id >= 0) {
+                                    DiaryActivity newAct = helper.getActivity(start_id);
+                                    int del = helper.getDel(newAct.getName());
+                                    Log.d("Bluetooth_PARA","del: "+del);
+                                    Log.d("Bluetooth_PARA","start_id: "+start_id);
+                                    Log.d("Bluetooth_PARA","name: "+newAct.getName());
+                                    Log.d("Bluetooth_PARA","color: "+newAct.getColor());
+                                    Log.d("Bluetooth_PARA","_id: "+newAct.getId());
+                                    Log.d("Bluetooth_PARA","type: "+newAct.getConnection());
+                                    newAct.setRunning(true);
+                                    MainActivity.addRunActivities(newAct);
+                                    MainActivity.refreshList();
                                 }
-                                for (String info : infos){
-                                    int start_id = helper.cHelper("QUERY",info,Condition_Bluetooth);
-                                    if(start_id >= 0) {
-                                        DiaryActivity newAct = helper.getActivity(start_id);
-                                        int del = helper.getDel(newAct.getName());
-                                        Log.d("Bluetooth_PARA","del: "+del);
-                                        Log.d("Bluetooth_PARA","start_id: "+start_id);
-                                        Log.d("Bluetooth_PARA","name: "+newAct.getName());
-                                        Log.d("Bluetooth_PARA","color: "+newAct.getColor());
-                                        Log.d("Bluetooth_PARA","_id: "+newAct.getId());
-                                        Log.d("Bluetooth_PARA","type: "+newAct.getConnection());
-                                        ActivityHelper.helper.setCurrentActivity(newAct);}
-                                }
-                                /*check 蓝牙是否有绑定activity
-                                    有->启动
-                                    无->return*/
                                 break;
                             case BluetoothAdapter.STATE_DISCONNECTED:
                                 Log.d("Bluetooth_info","蓝牙已断开");
-                                int close_id = helper.getCloseID(Condition_Bluetooth);
-                                if(close_id >= 0) {/*关闭activity*/}
+                                MainActivity.removeActivityWithConnection(Condition_Bluetooth);
+                                MainActivity.refreshList();
+                                    /*关闭activity*/
                             /*check activity是否绑定蓝牙
                                     有->关闭
                                     无->return*/
@@ -220,8 +216,9 @@ public class ConditionInfo{
                                 break;
                             case BluetoothAdapter.STATE_OFF:
                                 Log.d("Bluetooth_info","蓝牙已关闭");
-                                int close_id = helper.getCloseID(Condition_Bluetooth);
-                                if(close_id >= 0) {/*关闭activity*/}
+                                MainActivity.removeActivityWithConnection(Condition_Bluetooth);
+                                MainActivity.refreshList();
+                                    /*关闭activity*/
                                 break;
                     }
                     break;

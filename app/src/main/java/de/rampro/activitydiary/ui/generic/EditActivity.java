@@ -427,7 +427,8 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                                 Manifest.permission.ACCESS_WIFI_STATE,
                                 Manifest.permission.ACCESS_NETWORK_STATE,
                                 Manifest.permission.BLUETOOTH,
-                                Manifest.permission.BLUETOOTH_ADMIN
+                                Manifest.permission.BLUETOOTH_ADMIN,
+                                Manifest.permission.BLUETOOTH_CONNECT
                         }
                         ,EditActivity.this);
                 if (isAllGranted) {// 如果这3个权限全都拥有, 则直接执行
@@ -451,7 +452,8 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                         Manifest.permission.ACCESS_WIFI_STATE,
                         Manifest.permission.ACCESS_NETWORK_STATE,
                         Manifest.permission.BLUETOOTH,
-                        Manifest.permission.BLUETOOTH_ADMIN
+                        Manifest.permission.BLUETOOTH_ADMIN,
+                        Manifest.permission.BLUETOOTH_CONNECT
                 },BindCondition.Reference.REQUEST_CODE);
             }
         });

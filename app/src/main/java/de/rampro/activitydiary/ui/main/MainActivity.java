@@ -884,7 +884,7 @@ public class MainActivity extends BaseActivity implements
     }
     public static void removeActivityWithConnection(int type){
         for(int i=0;i<runActivities.size();i++){
-            if(runActivities.get(i).getConnection() == type){
+            if(runActivities.get(i).getConnection() == type && runActivities.get(i).getRunning()){
                 runActivities.remove(runActivities.get(i));
             }
         }

@@ -34,6 +34,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -52,36 +53,77 @@ public class PopupWindows {
     private Context context;  // 填充用
     private AlertDialog alertDialog;  // 弹窗本体
 
-    PopupWindows(Context _context){
+    PopupWindows(Context _context) {
         context = _context;
     }
 
     /**
      * 确认覆盖 Condition 的弹窗，只包含一条信息和确认/取消(OK/Cancel)按钮
+     *
      * @param type
      * @param info 弹窗的内容
      */
-
-    public void confirmOwConnection (int type, Map<String,String> exist, String info) throws InterruptedException {
-        String existInfo = exist.get("info");
-        String[] detailInfo = ConditionInfo.resolveInfo(existInfo);
-        String infoShow ="";   // 弹窗正文，可以根据需要再修改
-        String title = "已存在启动条件";
-        switch (type){
+    public void confirmConnection(int type, String info) throws InterruptedException {
+        String[] detailInfo = ConditionInfo.resolveInfo(info);
+        String infoShow = "";   // 弹窗正文，可以根据需要再修改
+        String title = "确认绑定";
+        switch (type) {
             case Condition_WIFI:
-                infoShow = "类型: "+"WIFI"+"\n"+
-                        "名称: " + detailInfo[0]+"\n"+
+                infoShow = "类型: " + "WIFI" + "\n" +
+                        "名称: " + detailInfo[0] + "\n" +
                         "地址: " + detailInfo[1];
                 break;
             case Condition_Bluetooth:
-                infoShow = "类型: "+"蓝牙"+"\n"+
-                        "名称: " + detailInfo[0]+"\n"+
+                infoShow = "类型: " + "蓝牙" + "\n" +
+                        "名称: " + detailInfo[0] + "\n" +
                         "地址: " + detailInfo[1];
                 break;
             case Condition_GPS:
                 infoShow = "类型: "+"GPS"+"\n"+
                         "经度: " + recNum(1, detailInfo[1])+"\n"+
                         "纬度: " + recNum(0, detailInfo[0]);
+                break;
+        }
+        alertDialog = new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(infoShow)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {  // OK按钮
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BindCondition.bindInfo = info;
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {  // Cancel按钮
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BindCondition.bindInfo = "";
+                    }
+                })
+                .create();
+        alertDialog.show();
+    }
+
+    public void confirmOwConnection(int type, Map<String, String> exist, String info) throws InterruptedException {
+        String existInfo = exist.get("info");
+        String[] detailInfo = ConditionInfo.resolveInfo(existInfo);
+        String infoShow = "";   // 弹窗正文，可以根据需要再修改
+        String title = "已存在启动条件";
+        switch (type) {
+            case Condition_WIFI:
+                infoShow = "类型: " + "WIFI" + "\n" +
+                        "名称: " + detailInfo[0] + "\n" +
+                        "地址: " + detailInfo[1];
+                break;
+            case Condition_Bluetooth:
+                infoShow = "类型: " + "蓝牙" + "\n" +
+                        "名称: " + detailInfo[0] + "\n" +
+                        "地址: " + detailInfo[1];
+                break;
+            case Condition_GPS:
+                infoShow = "类型: " + "GPS" + "\n" +
+                        "经度: " + detailInfo[0] + "\n" +
+                        "纬度: " + detailInfo[1];
                 break;
         }
         alertDialog = new AlertDialog.Builder(context)
@@ -104,22 +146,23 @@ public class PopupWindows {
                 .create();
         alertDialog.show();
     }
-    public void confirmOwActivity (int type, Map<String,String> exist,String info,String name) throws InterruptedException {
+
+    public void confirmOwActivity(int type, Map<String, String> exist, String info, String name) throws InterruptedException {
         String existInfo = exist.get("info");
         String[] detailInfo = ConditionInfo.resolveInfo(existInfo);
-        String infoShow ="";   // 弹窗正文，可以根据需要再修改
+        String infoShow = "";   // 弹窗正文，可以根据需要再修改
         String title = "该启动条件已被绑定";
-        switch (type){
+        switch (type) {
             case Condition_WIFI:
-                infoShow = "活动： " + name+"\n"+
-                        "类型: "+"WIFI"+"\n"+
-                        "名称: " + detailInfo[0]+"\n"+
+                infoShow = "活动： " + name + "\n" +
+                        "类型: " + "WIFI" + "\n" +
+                        "名称: " + detailInfo[0] + "\n" +
                         "地址: " + detailInfo[1];
                 break;
             case Condition_Bluetooth:
-                infoShow = "活动： " + name+"\n"+
-                        "类型: "+"蓝牙"+"\n"+
-                        "名称: " + detailInfo[0]+"\n"+
+                infoShow = "活动： " + name + "\n" +
+                        "类型: " + "蓝牙" + "\n" +
+                        "名称: " + detailInfo[0] + "\n" +
                         "地址: " + detailInfo[1];
                 break;
             case Condition_GPS:
@@ -143,7 +186,7 @@ public class PopupWindows {
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {  // Cancel按钮
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        BindCondition.bindInfo ="";
+                        BindCondition.bindInfo = "";
                     }
                 })
                 .create();
@@ -151,80 +194,6 @@ public class PopupWindows {
         alertDialog.show();
 
     }
-
-    /**
-     * 从多个选项中选择一个的弹窗
-     * @param type
-     * @param info 包含多个选项
-     */
-    public void chooseFromInfo(int type, String[] info){
-        index = -2;
-        String[] infoShow = info;  // 同上，可以修改
-        String title = "Please Choose One";
-
-        alertDialog = new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setIcon(R.mipmap.ic_launcher)
-                .setSingleChoiceItems(infoShow, 0, new DialogInterface.OnClickListener() {  // 添加单选框
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        index = i;
-                    }
-                })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {  // OK按钮
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (index == -2) {
-                            index = -1;
-                            Handle2(null);
-                        }
-                        else {
-                            Handle2(info[index]);
-                        }
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  // Cancel按钮
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        index = -1;
-                        Handle2(null);
-                    }
-                })
-                .create();
-        alertDialog.show();
-
-        // String res2;
-
-        // if(index >= 0)
-            // res2 =  info[index];
-        // else if(index == -1)
-            // res2 =  null;
-        // else
-            // res2 =  "ERROR";
-
-        // Log.d("Popup2", "res2=" + res2);
-        // return res2;
-    }
-
-    /**
-     * 处理确认覆盖的方法（仅作样例）
-     * @param res 1 点击 OK, 0 点击 Cancel
-     */
-    void Handle1(int res){
-        Log.d("Handle1", res+"");
-    }
-
-    /**
-     * 处理选择的方法（仅作样例）
-     * @param res 选项
-     */
-    void Handle2(String res){
-        Log.d("Handle2", res);
-    }
-
-    /**
-     * 从 info 中的投影恢复出经纬度
-     */
     private String recNum(int type, String str){
         Double num = Double.parseDouble(str) / 10000 * RANGE;
         if(type == 1){  // 经度
@@ -234,3 +203,75 @@ public class PopupWindows {
     }
 
 }
+
+//    /**
+//     * 从多个选项中选择一个的弹窗
+//     * @param type
+//     * @param info 包含多个选项
+//     */
+//    public void chooseFromInfo(int type, ArrayList<String> infos){
+//        index = -2;
+//        ArrayList<String> infoShow = infos;  // 同上，可以修改
+//        String title = "Please Choose One";
+//
+//        alertDialog = new AlertDialog.Builder(context)
+//                .setTitle(title)
+//                .setIcon(R.mipmap.ic_launcher)
+//                .setSingleChoiceItems(infoShow, 0, new DialogInterface.OnClickListener() {  // 添加单选框
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        index = i;
+//                    }
+//                })
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {  // OK按钮
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        if (index == -2) {
+//                            index = -1;
+//                            Handle2(null);
+//                        }
+//                        else {
+//                            Handle2(info[index]);
+//                        }
+//                    }
+//                })
+//                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  // Cancel按钮
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        index = -1;
+//                        Handle2(null);
+//                    }
+//                })
+//                .create();
+//        alertDialog.show();
+//
+//        // String res2;
+//
+//        // if(index >= 0)
+//            // res2 =  info[index];
+//        // else if(index == -1)
+//            // res2 =  null;
+//        // else
+//            // res2 =  "ERROR";
+//
+//        // Log.d("Popup2", "res2=" + res2);
+//        // return res2;
+//    }
+//
+//    /**
+//     * 处理确认覆盖的方法（仅作样例）
+//     * @param res 1 点击 OK, 0 点击 Cancel
+//     */
+//    void Handle1(int res){
+//        Log.d("Handle1", res+"");
+//    }
+//
+//    /**
+//     * 处理选择的方法（仅作样例）
+//     * @param res 选项
+//     */
+//    void Handle2(String res){
+//        Log.d("Handle2", res);
+//    }
+//
+//}
