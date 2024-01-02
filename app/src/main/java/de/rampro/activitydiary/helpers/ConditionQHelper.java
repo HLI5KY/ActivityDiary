@@ -57,14 +57,12 @@ public class ConditionQHelper {
                 values.put("connection_type",type);
 //                values.put("_deleted",1);
                 db.insert("activity_connection",null,values);
-                db.close();
                 return 1;
             case "UPDATE":
                 values.clear();
                 values.put("info",info);
                 values.put("connection_type",type);
                 db.update("activity_connection",values,"act_id =?",new String[]{Act_id});
-                db.close();
                 return 1;
             case "QUERY":
                 Cursor cursor = db.query("activity_connection",new String[]{"act_id","info"},"info =? AND connection_type =?",new String[]{info,Type},null,null,null);
@@ -72,18 +70,14 @@ public class ConditionQHelper {
                     if(cursor.moveToFirst()){
                         int res = cursor.getInt(cursor.getColumnIndexOrThrow("act_id"));
                         cursor.close();
-                        db.close();
                         return res;
                     }
                     cursor.close();
-                    db.close();
                     return -1;
                 }
-                db.close();
                 return -1;
             case "DELETE":
                 db.delete("activity_connection","act_id =? AND info =? AND connection_type =?",new String[]{Act_id,info,Type});
-                db.close();
                 return 1;
         }
         return -1;
@@ -159,7 +153,6 @@ public class ConditionQHelper {
             }
         }
         cursor.close();
-        db.close();
         return new DiaryActivity(act_id,name,color,type);
     }
 
@@ -170,12 +163,10 @@ public class ConditionQHelper {
             if(cursor.moveToFirst()){
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("_id"));
                 cursor.close();
-                db.close();
                 return id;
             }
             cursor.close();
         }
-        db.close();
         return -1;
     }
     public int getDel(String name){
@@ -185,12 +176,10 @@ public class ConditionQHelper {
             if(cursor.moveToFirst()){
                 int del = cursor.getInt(cursor.getColumnIndexOrThrow("_deleted"));
                 cursor.close();
-                db.close();
                 return del;
             }
             cursor.close();
         }
-        db.close();
         return -1;
     }
 }

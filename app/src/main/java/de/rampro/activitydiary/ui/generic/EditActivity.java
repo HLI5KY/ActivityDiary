@@ -19,6 +19,8 @@
  */
 package de.rampro.activitydiary.ui.generic;
 
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.REQUEST_CODE;
+
 import android.content.AsyncQueryHandler;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -449,6 +451,7 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                                 Manifest.permission.BLUETOOTH,
                                 Manifest.permission.BLUETOOTH_ADMIN,
                                 Manifest.permission.BLUETOOTH_CONNECT
+//                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
                         }
                         ,EditActivity.this);
                 if (isAllGranted) {// 如果这3个权限全都拥有, 则直接执行
@@ -466,15 +469,18 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
                     }
                     else  Toast.makeText(EditActivity.this,"绑定失败，请连接WIFI/蓝牙/GPS",Toast.LENGTH_LONG).show();
                 }
-                else ActivityCompat.requestPermissions(EditActivity.this,new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_WIFI_STATE,
-                        Manifest.permission.ACCESS_NETWORK_STATE,
-                        Manifest.permission.BLUETOOTH,
-                        Manifest.permission.BLUETOOTH_ADMIN,
-                        Manifest.permission.BLUETOOTH_CONNECT
-                },BindCondition.Reference.REQUEST_CODE);
+                else {
+                    ActivityCompat.requestPermissions(EditActivity.this,new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_WIFI_STATE,
+                            Manifest.permission.ACCESS_NETWORK_STATE,
+                            Manifest.permission.BLUETOOTH,
+                            Manifest.permission.BLUETOOTH_ADMIN,
+                            Manifest.permission.BLUETOOTH_CONNECT,
+//                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    }, REQUEST_CODE);
+                }
             }
         });
         //检测状态的修改
@@ -484,7 +490,6 @@ public class EditActivity extends BaseActivity implements ActivityHelper.DataCha
         ConditionInfo.GPS.changeReceiver(EditActivity.this, null);
 
         //Mycode end
-
 
         if(savedInstanceState != null) {
             String name = savedInstanceState.getString(NAME_KEY);
@@ -524,7 +529,22 @@ git
             }
         }
     }*/
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_CODE: {
+                if (grantResults != null && grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 权限被用户同意，可以做你要做的事情了。
+                } else {
+                    // 权限被用户拒绝了，可以提示用户,关闭界面等等。
+                }
+                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.R)
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},REQUEST_CODE);
+            }
+        }
+    }
     private boolean checkPermissionAllGranted(String[] permissions,Context context) {
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
