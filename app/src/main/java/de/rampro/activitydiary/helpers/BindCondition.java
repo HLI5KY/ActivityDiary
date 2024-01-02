@@ -225,7 +225,7 @@ public class BindCondition{
     }
 
     private static int BindGPS(String name,Context context) throws InterruptedException {
-        if(LocationHelper.helper.locationManager.isLocationEnabled()){
+        if(!LocationHelper.helper.locationManager.isLocationEnabled()){
             Toast.makeText(context, "请先开启定位服务", Toast.LENGTH_LONG).show();
             return 0;
         }
