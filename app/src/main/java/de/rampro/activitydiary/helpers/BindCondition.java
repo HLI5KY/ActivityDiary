@@ -49,7 +49,7 @@ import de.rampro.activitydiary.ui.main.MainActivity;
 public class BindCondition{
     public static class Reference{
         public static final int REQUEST_CODE = 100001;
-
+        public static final int REQUEST_CODE_LOCATION = 100002;
         public static final int Condition_WIFI = 1;
         public static final int Condition_Bluetooth = 2;
         public static final int Condition_GPS = 3;

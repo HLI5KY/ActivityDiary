@@ -20,6 +20,7 @@
 package de.rampro.activitydiary.ui.generic;
 
 import static de.rampro.activitydiary.helpers.BindCondition.Reference.REQUEST_CODE;
+import static de.rampro.activitydiary.helpers.BindCondition.Reference.REQUEST_CODE_LOCATION;
 
 import android.content.AsyncQueryHandler;
 import android.content.ContentUris;
@@ -537,11 +538,12 @@ git
                 if (grantResults != null && grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // 权限被用户同意，可以做你要做的事情了。
+                    if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.R)
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},REQUEST_CODE_LOCATION);
                 } else {
                     // 权限被用户拒绝了，可以提示用户,关闭界面等等。
                 }
-                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.R)
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},REQUEST_CODE);
+
             }
         }
     }
